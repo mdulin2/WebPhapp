@@ -1,4 +1,5 @@
 // https://glebbahmutov.com/blog/how-to-correctly-unit-test-express-server/
+
 var request = require('supertest');
 
 describe('loading express', function () {
@@ -20,9 +21,9 @@ describe('loading express', function () {
 
   // Specify all server test functions below
 
-  it('responds with a list to /api/getList', function testSlash(done) {
+  it('responds with a list to /api/v1/list', function testSlash(done) {
   request(server)
-    .get('/api/getList')
+    .get('/api/v1/list')
     .expect(didGetThreeList)
     .end(done);
   });
