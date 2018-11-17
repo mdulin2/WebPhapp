@@ -13,7 +13,6 @@ function readJsonFileSync(filepath, encoding){
     return JSON.parse(file);
 }
 
-
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -70,10 +69,15 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     res.json(p);
 });
 
-// Handles any requests that don't match the ones above
-app.get('*', (req,res) =>{
+// get the index
+app.get('/', (req,res) =>{
     res.sendFile(path.join(__dirname+'/../client/build/index.html'));
 });
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) => {
+    res.status(404).send('Not found');
+})
 
 // use the environment variable if set, otherwise use port 5000
 var server = app.listen(process.env.PORT || 5000, function () {

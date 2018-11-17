@@ -3,24 +3,34 @@
         {
             "prescriptionID" : "0001",
             "patientID" : "01",
+            "drugID" : "Xanax2",
             "filled" : true,
-            "fillDate" : "10-05-2018",
+            "fillDates" : ["10-05-2018"],
+            "writtenDate" : "09-22-2018",
             "oldestFillDate" : "10-05-2018",
             "quantity" : 1,
-            "days" : 7,
+            "daysFor" : 7,
+            "refillsLeft" : 1,
             "prescriberID" : "01",
-            "dispenserID" : "01"
+            "dispenserID" : "01",
+            "cancelled" : false,
+            "cancelDate" : ""
         },
         {
             "prescriptionID" : "0002",
             "patientID" : "02",
+            "drugID" : "Xanax1",
             "filled" : true,
-            "fillDate" : "10-23-2018",
+            "fillDates" : ["10-23-2018"],
+            "writtenDate" : "10-20-2018",
             "oldestFillDate" : "09-04-2018",
             "quantity" : 1,
-            "days" : 7,
+            "daysFor" : 7,
+            "refillsLeft" : 0,
             "prescriberID" : "01",
-            "dispenserID" : "01"
+            "dispenserID" : "01",
+            "cancelled" : false,
+            "cancelDate" : ""
         }
     ]
 }
