@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 class List extends Component {
   // Initialize the state
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       list: []
-    }
+    };
   }
 
   // Fetch the list on first mount
@@ -16,10 +16,10 @@ class List extends Component {
 
   // Retrieves the list of items from the Express app
   getList = () => {
-    fetch('/api/getList')
-    .then(res => res.json())
-    .then(list => this.setState({ list }))
-  }
+    fetch("/api/v1/list")
+      .then(res => res.json())
+      .then(list => this.setState({ list }));
+  };
 
   render() {
     const { list } = this.state;
@@ -31,20 +31,15 @@ class List extends Component {
         {list.length ? (
           <div>
             {/* Render the list of items */}
-            {list.map((item) => {
-              return(
-                <div>
-                  {item}
-                </div>
-              );
+            {list.map(item => {
+              return <div>{item}</div>;
             })}
           </div>
         ) : (
           <div>
             <h2>No List Items Found</h2>
           </div>
-        )
-      }
+        )}
       </div>
     );
   }
