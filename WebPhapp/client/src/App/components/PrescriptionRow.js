@@ -40,20 +40,32 @@ class PrescriptionRow extends Component {
 }
 
 PrescriptionRow.propTypes = {
-  prescriptionID: PropTypes.string,
-  patientID: PropTypes.string,
-  drugID: PropTypes.string,
-  filled: PropTypes.bool,
-  fillDates: PropTypes.arrayOf(PropTypes.string),
-  writtenDate: PropTypes.string,
-  oldestFillDate: PropTypes.string,
-  quantity: PropTypes.number,
-  daysFor: PropTypes.number,
-  refillsLeft: PropTypes.number,
-  prescriberID: PropTypes.string,
-  dispenserID: PropTypes.string,
-  cancelled: PropTypes.bool,
-  cancelDate: PropTypes.string
+  prescriptionID: PropTypes.string.validatePrescriptionID,
+  patientID: PropTypes.string.isRequired,
+  drugID: PropTypes.string.isRequired,
+  filled: PropTypes.bool.isRequired,
+  fillDates: PropTypes.arrayOf(PropTypes.string).isRequired,
+  writtenDate: PropTypes.string.isRequired,
+  oldestFillDate: PropTypes.string.isRequired,
+  quantity: PropTypes.number.isRequired,
+  daysFor: PropTypes.number.isRequired,
+  refillsLeft: PropTypes.number.isRequired,
+  prescriberID: PropTypes.string.isRequired,
+  dispenserID: PropTypes.string.isRequired,
+  cancelled: PropTypes.bool.isRequired,
+  cancelDate: PropTypes.string.isRequired,
+
+
+  // a custom validator for a prescriptionID 
+  // returns an Error object if the validation fails.
+  validatePrescriptionID: function(props, prescriptionID, prescriptionRow) {
+    if (!/matchme/.test(props[prescriptionID])) {
+      return new Error(
+        'Invalid prop or missing prop: ' + prescriptionID + '` supplied to' +
+        ' `' + prescriptionRow + '`. Validation failed.'
+      );
+    }
+  }
 };
 
 export default PrescriptionRow;
