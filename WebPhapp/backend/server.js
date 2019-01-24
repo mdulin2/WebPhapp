@@ -39,11 +39,8 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     });
 
     res.json(toSend);
-    if (toSend.length === 0){
-        console.log('Sent empty list: no prescriptions for given patient ID');
-    } else {
-        console.log('Sent prescriptions');
-    }
+    console.log('Sent ' + toSend.length.toString() + 
+                ' prescription(s) for patient ID ' + patientID.toString());
 });
 
 // An api endpoint that returns the prescription associated with a
