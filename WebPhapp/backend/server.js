@@ -4,6 +4,28 @@ var fs = require("fs");
 
 const app = express();
 
+// establish a connection to the local MySQL DB
+// DB can readily be moved to a remove location.
+// neither connection.connect() or connection.end() are needed yet.
+var mysql = require('mysql')
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'dummy-usr',
+  password : '',
+  database : 'pharmachain'
+});
+
+// Given a drugID, looks up a drug name in the local MySQL DB.
+// Args: drugID (int or string), callback (function that takes string)
+// Returns: a string. If no match, returns the empty string.
+function getDrugNameFromID(drugID, callback){
+    var q = 'SELECT NAME From pharmachain.pharmacopeia WHERE ID=' + drugID.toString();
+    connection.query(q, function (err, rows, _) {
+        if (err) throw err
+        callback(rows[0].NAME);
+    });
+}
+
 // JSON reader to read in dummy data
 function readJsonFileSync(filepath, encoding){
     if (typeof (encoding) == 'undefined'){
@@ -39,7 +61,16 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         }
     });
 
-    res.json(toSend);
+    // add the drugName to each prescription
+    // TODO: actually use promises instead...
+    var temp = [];
+    toSend.forEach(prescription => {
+        getDrugNameFromID(prescription.drugID, function(drugName){
+            temp.push(drugName);
+        });
+    });
+
+    res.json(temp);
     console.log('Sent ' + toSend.length.toString() + 
                 ' prescription(s) for patient ID ' + patientID.toString());
 });
@@ -59,12 +90,15 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     // '==' catches both null and undefined 
     if (p == null) {
         console.log('Sent empty prescription: no ID match');
-        p = {};
+        res.json({});
     } else {
-        console.log("Sent single prescription with ID " + prescriptionID);
+        // get drug name from ID
+        getDrugNameFromID(p.drugID, function(drugName){
+            console.log("Sent single prescription with ID " + prescriptionID);
+            p.drugName = drugName;
+            res.json(p);
+        });
     }
-
-    res.json(p);
 });
 
 /*

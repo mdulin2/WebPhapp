@@ -3,7 +3,7 @@
     {
       "prescriptionID": "0001",
       "patientID": "01",
-      "drugID": "Xanax2",
+      "drugID": 2,
       "fillDates": ["10-05-2018"],
       "writtenDate": "09-22-2018",
       "quantity": 1,
@@ -17,7 +17,7 @@
     {
       "prescriptionID": "0002",
       "patientID": "01",
-      "drugID": "Vicodin",
+      "drugID": 3,
       "fillDates": [],
       "writtenDate": "011-04-2018",
       "quantity": 1,
@@ -31,7 +31,7 @@
     {
       "prescriptionID": "0003",
       "patientID": "01",
-      "drugID": "Synthroid",
+      "drugID": 4,
       "fillDates": ["10-20-2018", "11-07-2018"],
       "writtenDate": "10-13-2018",
       "quantity": 1,
@@ -45,7 +45,7 @@
     {
       "prescriptionID": "0004",
       "patientID": "01",
-      "drugID": "Delasone",
+      "drugID": 5,
       "fillDates": ["01-4-2019"],
       "writtenDate": "01-2-2019",
       "quantity": 1,
@@ -59,7 +59,7 @@
     {
       "prescriptionID": "0005",
       "patientID": "01",
-      "drugID": "Amoxil",
+      "drugID": 6,
       "fillDates": ["01-5-2019"],
       "writtenDate": "01-2-2019",
       "quantity": 1,
@@ -73,7 +73,7 @@
     {
       "prescriptionID": "0006",
       "patientID": "01",
-      "drugID": "Neurontin",
+      "drugID": 7,
       "fillDates": [],
       "writtenDate": "01-2-2019",
       "quantity": 1,
@@ -87,7 +87,7 @@
     {
       "prescriptionID": "0007",
       "patientID": "02",
-      "drugID": "Xanax1",
+      "drugID": 1,
       "fillDates": ["10-23-2018"],
       "writtenDate": "10-20-2018",
       "quantity": 1,
