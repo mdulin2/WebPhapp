@@ -16,7 +16,8 @@ function readJsonFileSync(filepath, encoding){
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
-// An api endpoint that returns a short list of items
+// An api endpoint that returns a short list of items.
+// Used for frontend testing. To be removed when ready.
 app.get('/api/v1/list', (req,res) => {
     var list = ["item1", "item2", "item3"];
     res.json(list);
@@ -64,6 +65,61 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     }
 
     res.json(p);
+});
+
+/*
+About:
+    An api endpoint that returns a list of patients given a first and
+    last name. Patient data temporarily includes date of birth, 
+    first and last name, and patient ID. Names are converted to all lowercase.
+    You can request patients by first name, last name, or both.
+    TODO: restrict query to a single prescriber.
+Examples:
+    Directly in terminal:
+        By both first and last name:
+            >>> curl "http://localhost:5000/api/v1/patients?first=jacob&last=krantz"
+        By just first name:
+            >>> curl "http://localhost:5000/api/v1/patients?first=jacob"
+        By just last name:
+            >>> curl "http://localhost:5000/api/v1/patients?last=krantz"
+    To be used in Axois call:
+        .get("/api/v1/patients?first=jacob&last=krantz")
+        .get("/api/v1/patients?first=jacob")
+        .get("/api/v1/patients?last=krantz")
+
+Returns:
+    List of patients with all personal information:
+    [{"first":"jacob","last":"krantz","patient_id":"01","dob":"10-05-1996"}, { ... }]
+
+Relevant Express Docs:
+    https://expressjs.com/en/api.html#req.query
+*/
+app.get('/api/v1/patients', (req,res) => {
+    var first = req.query.first;
+    var last = req.query.last;
+
+    // will be replaced with DB call once we determine user auth.
+    var all_patients = readJsonFileSync(
+        __dirname + '/' + "dummy_data/patients.json").patients;
+
+    var matchingPatients = all_patients.filter(function(elem) {
+        if( last === undefined ){
+            return (elem.first === first.toLowerCase());
+        }
+        else if( first === undefined ){
+            return (elem.last === last.toLowerCase());
+        }
+        return (elem.first === first.toLowerCase())
+                && (elem.last === last.toLowerCase());
+    });
+
+    // log the backend process to the terminal
+    var msg = '/api/v1/patients: returning ' + matchingPatients.length.toString() + ' patient match(es) for';
+    if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
+    if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
+    console.log(msg);
+
+    res.json(matchingPatients);
 });
 
 // get the index
