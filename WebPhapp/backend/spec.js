@@ -19,23 +19,15 @@ describe("loading express", function() {
     server.close(done);
   });
 
-  // Specify all server test functions below...
 
-  // unit test for the basic list return route.
-  it("responds with a list to /api/v1/list", function(done) {
-    request(server)
-      .get("/api/v1/list")
-      .expect(function didGetThreeList(res) {
-        var lst = res.body;
-        if (lst.length !== 3)
-          throw new Error("Body did not contain list of three elements");
-      })
-      .end(done);
-  });
+  // ------------------------------------------------------
+  //             Tests: /api/vi/prescriptions
+  // ------------------------------------------------------
+
 
   // ensure that given a prescription ID, the get request
   //   returns the associated prescription info.
-  it("testSinglePrescriptionRoute", function(done) {
+  it("test-route-prescriptions/single", function(done) {
     request(server)
       .get("/api/v1/prescriptions/single/0002")
       .expect(function didGetPrescription(res) {
@@ -57,7 +49,7 @@ describe("loading express", function() {
 
   // ensures that given a faulty prescription ID, the get request
   //    does not return a prescription.
-  it("testBadSinglePrescriptionRoute", function(done) {
+  it("test-route-prescriptions/single-bad", function(done) {
     request(server)
       .get("/api/v1/prescriptions/single/1234567898765434567876543")
       .expect(function didGetPrescription(res) {
@@ -67,7 +59,7 @@ describe("loading express", function() {
       .end(done);
   });
 
-  it("testMultiplePrescriptionsRoute", function(done) {
+  it("test-route-prescriptions", function(done) {
     request(server)
       .get("/api/v1/prescriptions/01")
       .expect(function(res) {
@@ -77,7 +69,7 @@ describe("loading express", function() {
       .end(done);
   });
 
-  it("testBadMultiplePrescriptionsRoute", function(done) {
+  it("test-route-prescriptions-bad", function(done) {
     request(server)
       .get("/api/v1/prescriptions/012345678909876543234567")
       .expect(function(res) {
@@ -87,13 +79,69 @@ describe("loading express", function() {
       .end(done);
   });
 
-  it("testPatientListRoute", function(done) {
-    // no API routes created yet
+
+  // ------------------------------------------------------
+  //             Tests: /api/vi/patients
+  // ------------------------------------------------------
+
+
+  it("test-route-patients-full", function(done) {
+    // test for fully qualified first and last name
     request(server)
-      .get("/api/vi/patients")
-      .expect(404, done)
+      .get("/api/v1/patients?first=jacob&last=krantz")
+      .expect(function(res) {
+        if(res.body.length <= 1) throw new Error('Should be two or more jacob krantz patients for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+          throw new Error('Found empty patient field.');
+        }
+        return true;
+      })
       .end(done);
   });
+
+  it("test-route-patients-full-bad", function(done) {
+    // test for fully qualified first and last name
+    request(server)
+      .get("/api/v1/patients?first=madeupnamethatdoesnotexist&last=asdf")
+      .expect(function(res) {
+        if(res.body.length !== 0) throw new Error('Returned patient info for input with no matches.');
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-patients-first", function(done) {
+    // test for fully qualified first and last name
+    request(server)
+      .get("/api/v1/patients?first=jacob")
+      .expect(function(res) {
+        if(res.body.length <= 1) throw new Error('Should be two or more jacob patients for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+          throw new Error('Found empty patient field.');
+        }
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-patients-last", function(done) {
+    // test for fully qualified first and last name
+    request(server)
+      .get("/api/v1/patients?last=krantz")
+      .expect(function(res) {
+        if(res.body.length <= 1) throw new Error('Should be two or more krantz patients for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+          throw new Error('Found empty patient field.');
+        }
+        return true;
+      })
+      .end(done);
+  });
+
+  // ------------------------------------------------------
+  //             Tests: other
+  // ------------------------------------------------------
+
 
   // 404 everything else
   it("404 everything else for now", function testPath(done) {
