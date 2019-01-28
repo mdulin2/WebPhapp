@@ -40,7 +40,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     });
 
     res.json(toSend);
-    console.log('Sent ' + toSend.length.toString() + 
+    console.log('Sent ' + toSend.length.toString() +
                 ' prescription(s) for patient ID ' + patientID.toString());
 });
 
@@ -56,7 +56,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
         return elem.prescriptionID === prescriptionID;
     });
 
-    // '==' catches both null and undefined 
+    // '==' catches both null and undefined
     if (p == null) {
         console.log('Sent empty prescription: no ID match');
         p = {};
@@ -70,7 +70,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
 /*
 About:
     An api endpoint that returns a list of patients given a first and
-    last name. Patient data temporarily includes date of birth, 
+    last name. Patient data temporarily includes date of birth,
     first and last name, and patient ID. Names are converted to all lowercase.
     You can request patients by first name, last name, or both.
     TODO: restrict query to a single prescriber.
@@ -102,15 +102,16 @@ app.get('/api/v1/patients', (req,res) => {
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
 
+    // Searching for substrings 
     var matchingPatients = all_patients.filter(function(elem) {
         if( last === undefined ){
-            return (elem.first === first.toLowerCase());
+            return (elem.first.includes(first.toLowerCase()));
         }
         else if( first === undefined ){
-            return (elem.last === last.toLowerCase());
+            return (elem.last.includes(last.toLowerCase()));
         }
-        return (elem.first === first.toLowerCase())
-                && (elem.last === last.toLowerCase());
+        return (elem.first.includes(first.toLowerCase()))
+                && (elem.last.includes(last.toLowerCase()));
     });
 
     // log the backend process to the terminal
