@@ -7,23 +7,23 @@ class People extends Component {
   displayPeople = () => {
     return this.props.patientList.map(person => {
       return(
-        <tr key={person.patient_id}>
+        <tr key={person.patientID}>
           <td>
-          <a href = {"/patient?ID=" + person.patient_id}>
-          {person.patient_id}</a>
+          <a href = {"/patient?ID=" + person.patientID}>
+          {person.patientID}</a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id} target="_blank">
+            <a href = {"/patient?ID=" + person.patientID} target="_blank">
               {person.first}
             </a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id}>
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.last}
             </a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id}>
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.dob}
             </a>
           </td>
@@ -55,7 +55,7 @@ class People extends Component {
 People.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
-        patient_id: PropTypes.number.isRequired,
+        patientID: PropTypes.number.isRequired,
         first: PropTypes.string,
         last: PropTypes.string,
         dob: PropTypes.string
