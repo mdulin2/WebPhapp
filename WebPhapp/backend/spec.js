@@ -91,7 +91,7 @@ describe("loading express", function() {
       .get("/api/v1/patients?first=jacob&last=krantz")
       .expect(function(res) {
         if(res.body.length <= 1) throw new Error('Should be two or more jacob krantz patients for testing.');
-        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patientID].includes(undefined)){
           throw new Error('Found empty patient field.');
         }
         return true;
@@ -116,7 +116,7 @@ describe("loading express", function() {
       .get("/api/v1/patients?first=jacob")
       .expect(function(res) {
         if(res.body.length <= 1) throw new Error('Should be two or more jacob patients for testing.');
-        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patientID].includes(undefined)){
           throw new Error('Found empty patient field.');
         }
         return true;
@@ -125,18 +125,83 @@ describe("loading express", function() {
   });
 
   it("test-route-patients-last", function(done) {
-    // test for fully qualified first and last name
+    // test for fully qualified last name
     request(server)
       .get("/api/v1/patients?last=krantz")
       .expect(function(res) {
         if(res.body.length <= 1) throw new Error('Should be two or more krantz patients for testing.');
-        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patient_id].includes(undefined)){
+        if([res.body[0].first, res.body[0].last, res.body[0].dob, res.body[0].patientID].includes(undefined)){
           throw new Error('Found empty patient field.');
         }
         return true;
       })
       .end(done);
   });
+
+  it("test-route-patients-null", function(done) {
+    // test to ensure all patients are returned when no queries are provided.
+    request(server)
+      .get("/api/v1/patients")
+      .expect(function(res) {
+        if(res.body.length <= 5) throw new Error('Should return all patients.');
+        return true;
+      })
+      .end(done);
+  });
+
+
+  // ------------------------------------------------------
+  //             Tests: /api/vi/patients
+  // ------------------------------------------------------
+
+
+  it("test-route-patients-id", function(done) {
+    // test for patientID that exists
+    request(server)
+      .get("/api/v1/patients/02")
+      .expect(function(res) {
+        if([res.body.first, res.body.last, res.body.dob, res.body.patientID].includes(undefined)){
+          throw new Error('Found empty patient field.');
+        }
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-patients-id-bad", function(done) {
+    // test for fully qualified first and last name
+    request(server)
+      .get("/api/v1/patients/0023456543456543234567")
+      .expect(function(res) {
+        var fields = new Set([res.body.first, res.body.last, res.body.dob, res.body.patientID]);
+        if(fields.length > 1){
+          throw new Error('Should not have any patient fields for bad patientID.');
+        }
+        if(!fields.has(undefined)){
+          throw new Error('Patient fields should be empty for bad patientID');
+        }
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-patients-id-bad2", function(done) {
+    // test for a patientID input that is of the wrong type
+    request(server)
+      .get("/api/v1/patients/astring")
+      .expect(function(res) {
+        var fields = new Set([res.body.first, res.body.last, res.body.dob, res.body.patientID]);
+        if(fields.length > 1){
+          throw new Error('Should not have any patient fields for bad patientID.');
+        }
+        if(!fields.has(undefined)){
+          throw new Error('Patient fields should be empty for bad patientID');
+        }
+        return true;
+      })
+      .end(done);
+  });
+
 
   // ------------------------------------------------------
   //             Tests: other

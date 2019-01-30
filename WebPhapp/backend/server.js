@@ -89,7 +89,15 @@ Examples:
 
 Returns:
     List of patients with all personal information:
-    [{"first":"jacob","last":"krantz","patient_id":"01","dob":"10-05-1996"}, { ... }]
+    [
+        {
+            "first":"jacob",
+            "last":"krantz",
+            "patientID":"01",
+            "dob":"10-05-1996"
+        },
+        ... 
+    ]
 
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
@@ -104,7 +112,10 @@ app.get('/api/v1/patients', (req,res) => {
 
     // Searching for substrings 
     var matchingPatients = all_patients.filter(function(elem) {
-        if( last === undefined ){
+        if( first === undefined && last === undefined ){
+            // if no query given, return all patients
+            return true;
+        } else if( last === undefined ){
             return (elem.first.includes(first.toLowerCase()));
         }
         else if( first === undefined ){
@@ -121,6 +132,50 @@ app.get('/api/v1/patients', (req,res) => {
     console.log(msg);
 
     res.json(matchingPatients);
+});
+
+/*
+About:
+    An api endpoint that returns the info about a patient given a specific
+    patient ID. Patient data temporarily includes date of birth, first and 
+    last name, and patient ID. 
+    TODO: restrict query to a single prescriber.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/patients/01"
+    To be used in Axois call:
+        .get("/api/v1/patients/01")
+Returns:
+    Patient info object with all personal information:
+    {
+        "first":"jacob",
+        "last":"krantz",
+        "patientID":"01",
+        "dob":"10-05-1996"
+    }
+*/
+app.get('/api/v1/patients/:patientID', (req,res) => {
+    var patientID = req.params.patientID;
+
+    // will be replaced with DB call once we determine user auth.
+    var all_patients = readJsonFileSync(
+        __dirname + '/' + "dummy_data/patients.json").patients;
+
+    var matchingPatient = all_patients.find(function(patient){
+        return patient.patientID === patientID;
+    })
+
+    // log the backend process to the terminal
+    var msg = '/api/v1/patients/:patientID: ';
+    if(matchingPatient === undefined){
+        msg += 'Returning no patient. No patientID matching \'' + patientID.toString() + '\'';
+        matchingPatient = {};
+    } else {
+        msg += 'Returning patient info for patientID \'' + patientID.toString() + '\'';
+    }
+
+    console.log(msg);
+    res.json(matchingPatient);
 });
 
 // get the index
