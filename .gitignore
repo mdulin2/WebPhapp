@@ -86,3 +86,6 @@ coverage
 
 # DynamoDB Local files
 .dynamodb/
+
+# Remote DB credentials file
+connections.js

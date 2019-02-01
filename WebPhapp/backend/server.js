@@ -1,28 +1,29 @@
 const express = require('express');
 const path = require('path');
 var fs = require("fs");
+var conn = require('./connections.js') // private file not under VC.
 
 const app = express();
 
-// establish a connection to the local MySQL DB
-// DB can readily be moved to a remove location.
-// neither connection.connect() or connection.end() are needed yet.
+// establish a connection to the remote MySQL DB
 var mysql = require('mysql')
-var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'dummy-usr',
-  password : '',
-  database : 'pharmachain'
-});
+var connection = mysql.createConnection(conn);
 
-// Given a drugID, looks up a drug name in the local MySQL DB.
-// Args: drugID (int or string), callback (function that takes string)
-// Returns: a string. If no match, returns the empty string.
-function getDrugNameFromID(drugID, callback){
-    var q = 'SELECT NAME From pharmachain.pharmacopeia WHERE ID=' + drugID.toString();
-    connection.query(q, function (err, rows, _) {
-        if (err) throw err
-        callback(rows[0].NAME);
+// Given a list of drugIDs, looks up drug names in the MySQL DB.
+// Args: drugIDs list <(int or string)>
+// Returns: Promise
+function getDrugNamesFromIDs(drugIDs){
+    var q = `
+        SELECT ID, NAME
+        FROM seniordesign1.pharmacopeia
+        WHERE ID IN (` + drugIDs.toString() + `)
+    `;
+
+    return new Promise((resolve, reject) => {
+        connection.query(q, (error, rows, fields) => {
+            if (error) reject(error);
+            resolve({rows, fields});
+        });
     });
 }
 
@@ -46,9 +47,20 @@ app.get('/api/v1/list', (req,res) => {
     console.log('Sent list of items');
 });
 
-// An api endpoint that returns all of the prescriptions
-// associated with a patient ID
-// example: http://localhost:5000/api/v1/prescriptions/01
+/*
+An api endpoint that returns all of the prescriptions associated with a patient ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/01"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/01")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates, 
+        writtenDate, quantity, daysFor, refillsLeft, 
+        prescriberID, dispenserID, cancelled, cancelDate, drugName
+    ]
+*/
 app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     var patientID = req.params.patientID;
     var prescriptions = readJsonFileSync(
@@ -61,23 +73,53 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         }
     });
 
-    // add the drugName to each prescription
-    // TODO: actually use promises instead...
-    var temp = [];
-    toSend.forEach(prescription => {
-        getDrugNameFromID(prescription.drugID, function(drugName){
-            temp.push(drugName);
-        });
-    });
+    // if no prescriptions for a patient ID, return early
+    var msg = 'Sent ' + toSend.length.toString() + 
+                ' prescription(s) for patient ID ' + patientID.toString();
+    if(toSend.length === 0){
+        console.log(msg);
+        res.json([]);
+        return;
+    }
 
-    res.json(temp);
-    console.log('Sent ' + toSend.length.toString() + 
-                ' prescription(s) for patient ID ' + patientID.toString());
+    var drugIDs = toSend.map((prescription) => {
+        return prescription.drugID;
+    })
+
+    // Look up the drug names given the list of drugIDs in MySQL
+    getDrugNamesFromIDs(drugIDs)
+    .then((answer) => {
+        for (var i = 0; i < toSend.length; i++){
+            var drug = answer.rows.filter((r) => {
+                return (r.ID === toSend[i].drugID);
+            })[0];
+            toSend[i].drugName = drug.NAME;
+        }
+
+        console.log(msg);
+        res.json(toSend);
+    })
+    .catch((error) => {
+        console.log("/api/v1/prescriptions: error: ", error);
+        res.json({});
+    });
 });
 
-// An api endpoint that returns the prescription associated with a
-// given prescription ID.
-// example: http://localhost:5000/api/v1/prescriptions/single/0002
+/*
+An api endpoint that returns the prescription associated with a
+given prescription ID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/single/0002"
+    To be used in Axois call:
+        .get("/api/v1/prescriptions/single/0002")
+Returns:
+    A single prescription object with fields: [
+        prescriptionID, patientID, drugID, fillDates, 
+        writtenDate, quantity, daysFor, refillsLeft, 
+        prescriberID, dispenserID, cancelled, cancelDate, drugName
+    ]
+*/
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     var prescriptionID = req.params.prescriptionID;
     var pres = readJsonFileSync(
@@ -89,16 +131,27 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
 
     // '==' catches both null and undefined 
     if (p == null) {
-        console.log('Sent empty prescription: no ID match');
+        console.log('/api/v1/prescriptions/single: No ID match');
         res.json({});
-    } else {
-        // get drug name from ID
-        getDrugNameFromID(p.drugID, function(drugName){
-            console.log("Sent single prescription with ID " + prescriptionID);
-            p.drugName = drugName;
-            res.json(p);
-        });
+        return;
     }
+    
+    // Look up the drug name given the ID in MySQL
+    getDrugNamesFromIDs([p.drugID])
+    .then((answer) => {
+        if (answer.rows.length === 0) {
+            p.drugName = '';
+        } else {
+            p.drugName = answer.rows[0].NAME;
+        }
+        
+        console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+        res.json(p);
+    })
+    .catch((error) => {
+        console.log("/api/v1/prescriptions/single: error: ", error);
+        res.json({});
+    });
 });
 
 /*

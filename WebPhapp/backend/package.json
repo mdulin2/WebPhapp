@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha spec.js"
+    "test": "mocha --exit spec.js"
   },
   "keywords": [],
   "author": "Jacob Krantz, Andy Yang",
