@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
 import PrescriptionRow from "../components/PrescriptionRow";
+import qs from 'qs';
 
-class Prescription extends Component {
+class Patient extends Component {
   // Initialize the state
   state = {
     prescription: []
@@ -16,15 +17,21 @@ class Prescription extends Component {
   // Retrieves the items in a prescription from the Express app
   // ex. api/v1/prescriptions/01
   getPrescription = () => {
+
+    // Gets parameter from the URL of 'ID'
+    const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
+    const patientID = querystring.ID;
+
     axios
-      .get("/api/v1/prescriptions/01")
+      // String interpolation.
+      .get(`/api/v1/prescriptions/${patientID}`)
       .then(results => results.data)
       .then(prescription => this.setState({ prescription }));
   };
 
   // displayPrescription() displays the properties of a prescription using PrescriptionRow
   // @return: returns all prescriptions for a patient id
-  displayPrescription = () =>
+  displayPrescriptions = () =>
     this.state.prescription.map(prescription => (
       <PrescriptionRow
         // unique identifier or key is the prescription ID
@@ -56,7 +63,7 @@ class Prescription extends Component {
         {prescription ? (
           <div>
             {/* Render the prescription */}
-            {this.displayPrescription()}
+            {this.displayPrescriptions()}
           </div>
         ) : (
           <div>
@@ -68,4 +75,4 @@ class Prescription extends Component {
   }
 }
 
-export default Prescription;
+export default Patient;

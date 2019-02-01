@@ -12,13 +12,9 @@ class PrescriptionRow extends Component {
         &nbsp;
         {this.props.drugID}
         &nbsp;
-        {String(this.props.filled)}
-        &nbsp;
         {this.props.fillDates}
         &nbsp;
         {this.props.writtenDate}
-        &nbsp;
-        {this.props.oldestFillDate}
         &nbsp;
         {this.props.quantity}
         &nbsp;
@@ -43,10 +39,8 @@ PrescriptionRow.propTypes = {
   prescriptionID: PropTypes.string.validatePrescriptionID,
   patientID: PropTypes.string.isRequired,
   drugID: PropTypes.string.isRequired,
-  filled: PropTypes.bool.isRequired,
   fillDates: PropTypes.arrayOf(PropTypes.string).isRequired,
   writtenDate: PropTypes.string.isRequired,
-  oldestFillDate: PropTypes.string.isRequired,
   quantity: PropTypes.number.isRequired,
   daysFor: PropTypes.number.isRequired,
   refillsLeft: PropTypes.number.isRequired,
@@ -56,7 +50,7 @@ PrescriptionRow.propTypes = {
   cancelDate: PropTypes.string.isRequired,
 
 
-  // a custom validator for a prescriptionID 
+  // a custom validator for a prescriptionID
   // returns an Error object if the validation fails.
   validatePrescriptionID: function(props, prescriptionID, prescriptionRow) {
     if (!/matchme/.test(props[prescriptionID])) {

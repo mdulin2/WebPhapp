@@ -4,7 +4,8 @@ import "./App.css";
 import Home from "./Home";
 
 import List from "./List";
-import Prescription from "./Prescription";
+import Patient from "./Patient";
+import PatientSearch from "./PatientSearch"
 
 class App extends Component {
   render() {
@@ -13,7 +14,8 @@ class App extends Component {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/list" component={List} />
-          <Route path="/prescription" component={Prescription} />
+          <Route path="/patient" component={Patient} />
+          <Route path="/patientSearch" component={PatientSearch} />
         </Switch>
       </div>
     );
