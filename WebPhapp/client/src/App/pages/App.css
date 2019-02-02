@@ -30,11 +30,3 @@
     transform: rotate(360deg);
   }
 }
-
-table tr td a {
-    display:block;
-    height:100%;
-    width:100%;
-    color: #428BCA;
-    text-decoration: none;
-}
