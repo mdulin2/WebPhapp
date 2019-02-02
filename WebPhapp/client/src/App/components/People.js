@@ -13,7 +13,7 @@ class People extends Component {
           {person.patientID}</a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patientID} target="_blank">
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.first}
             </a>
           </td>
@@ -34,6 +34,7 @@ class People extends Component {
 
   render() {
     return (
+      // Returns a table of patients styled according to the Argon style system
       <table class="table table-hover">
       <tbody>
         <tr class="table-primary">
@@ -42,16 +43,14 @@ class People extends Component {
           <th scope="col" >Last Name</th>
           <th scope="col">Date Of Birth</th>
         </tr>
-
         {this.displayPeople()}
-
       </tbody>
       </table>
     );
   }
 }
 
-// Just the form of each person
+// The properties of each person patient id, first name, last name, and data of birth
 People.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
