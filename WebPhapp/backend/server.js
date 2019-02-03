@@ -6,8 +6,10 @@ var conn = require('./connections.js') // private file not under VC.
 const app = express();
 
 // establish a connection to the remote MySQL DB
-var mysql = require('mysql')
-var connection = mysql.createConnection(conn.MySQL);
+if(conn.MySQL){
+    var mysql = require('mysql')
+    var connection = mysql.createConnection(conn.MySQL);
+}
 
 // Given a list of drugIDs, looks up drug names in the MySQL DB.
 // Args: drugIDs list <(int or string)>
@@ -67,26 +69,33 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
     var toSend = [];
-    prescriptions.forEach(prescription => {
-        if ( prescription.patientID === patientID ){
-            toSend.push(prescription);
-        }
+    prescriptions.forEach(p => {
+        if (p.patientID === patientID) toSend.push(p);
     });
 
     // if no prescriptions for a patient ID, return early
     var msg = 'Sent ' + toSend.length.toString() + 
                 ' prescription(s) for patient ID ' + patientID.toString();
-    if(toSend.length === 0){
+    if (toSend.length === 0) {
         console.log(msg);
         res.json([]);
         return;
     }
 
+    // if no connection string (Travis testing), fill drugName with dummy info
+    if (!conn.MySQL) {
+        for (var i = 0; i < toSend.length; i++){
+            toSend[i].drugName = "drugName";
+        }
+        res.json(toSend);
+        return;
+    }
+
+    // Look up the drug names given the list of drugIDs in MySQL
     var drugIDs = toSend.map((prescription) => {
         return prescription.drugID;
     })
 
-    // Look up the drug names given the list of drugIDs in MySQL
     getDrugNamesFromIDs(drugIDs)
     .then((answer) => {
         for (var i = 0; i < toSend.length; i++){
@@ -122,10 +131,10 @@ Returns:
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     var prescriptionID = req.params.prescriptionID;
-    var pres = readJsonFileSync(
+    var prescriptions = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
-    var p = pres.find( function(elem) {
+    var p = prescriptions.find( function(elem) {
         return elem.prescriptionID === prescriptionID;
     });
 
@@ -136,6 +145,13 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
         return;
     }
     
+    // if no connection string (Travis testing), fill drugName with dummy info
+    if (!conn.MySQL) {
+        p.drugName = "drugName";
+        res.json(p);
+        return;
+    }
+
     // Look up the drug name given the ID in MySQL
     getDrugNamesFromIDs([p.drugID])
     .then((answer) => {
@@ -263,11 +279,6 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     console.log(msg);
     res.json(matchingPatient);
-});
-
-// get the index
-app.get('/', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/../client/build/index.html'));
 });
 
 // Handles any requests that don't match the ones above
