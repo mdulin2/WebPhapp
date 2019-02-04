@@ -3,6 +3,10 @@
 
 The Pharmachain web app!
 
+## MySQL DB Connection  
+In the directory `Webphapp/Webphapp/backend/` is the file `connections.js`. This file holds the connection strings for the database. To have any database functionality, you need to insert proper credentials to this file. You can find the working `connections.js` file in the GDrive folder. If connection strings are not provided, the backend falls back on filling in dummy data. When you commit future changes, make sure not to push the connection strings. This should be a hard mistake to make because the file is listed in `.gitignore`.
+
+
 ## Unit Testing  
 Run all tests before changing any files, opening a PR, updating a PR, and reviewing a PR.  
 
