@@ -3,37 +3,37 @@
         {
             "first": "jacob",
             "last": "krantz",
-            "patientID": "01",
+            "patientID": 1,
             "dob": "10-05-1996"
         },
         {
             "first": "maxwell",
             "last": "dulin",
-            "patientID": "02",
+            "patientID": 2,
             "dob": "10-06-1996"
         },
         {
             "first": "andrew",
             "last": "yang",
-            "patientID": "03",
+            "patientID": 3,
             "dob": "10-07-1996"
         },
         {
             "first": "mehak",
             "last": "bharagava",
-            "patientID": "04",
+            "patientID": 4,
             "dob": "10-08-1996"
         },
         {
             "first": "jeb",
             "last": "kilfoyle",
-            "patientID": "05",
+            "patientID": 5,
             "dob": "10-09-1996"
         },
         {
             "first": "jacob",
             "last": "krantz",
-            "patientID": "06",
+            "patientID": 6,
             "dob": "3-02-2004"
         }
     ]

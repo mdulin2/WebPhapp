@@ -29,13 +29,13 @@ describe("loading express", function() {
   //   returns the associated prescription info.
   it("test-route-prescriptions/single", function(done) {
     request(server)
-      .get("/api/v1/prescriptions/single/0002")
+      .get("/api/v1/prescriptions/single/2")
       .expect(function didGetPrescription(res) {
         var pres = res.body;
 
         // assert the prescription ID is in the returned prescription.
         //    it would be best to pass this value to this function somehow.
-        var expectedID = "0002";
+        var expectedID = 2;
         if (pres.prescriptionID !== expectedID)
           throw new Error("Did not return the expected prescription");
 
@@ -61,7 +61,7 @@ describe("loading express", function() {
 
   it("test-route-prescriptions", function(done) {
     request(server)
-      .get("/api/v1/prescriptions/01")
+      .get("/api/v1/prescriptions/1")
       .expect(function(res) {
         // TODO
         return true;
@@ -71,7 +71,7 @@ describe("loading express", function() {
 
   it("test-route-prescriptions-bad", function(done) {
     request(server)
-      .get("/api/v1/prescriptions/012345678909876543234567")
+      .get("/api/v1/prescriptions/12345678909876543234567")
       .expect(function(res) {
         // TODO
         null;
