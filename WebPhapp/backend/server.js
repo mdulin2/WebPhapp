@@ -11,9 +11,16 @@ if(conn.MySQL){
     var connection = mysql.createConnection(conn.MySQL);
 }
 
-// Given a list of drugIDs, looks up drug names in the MySQL DB.
-// Args: drugIDs list <(int or string)>
-// Returns: Promise
+/*
+Given a list of drugIDs, looks up drug names in the MySQL DB.
+Args: drugIDs list <(int or string)>
+Returns: Promise.
+    Upon resolution, returns (answer) which is a list of rows.
+    Answer can be unpacked in a call to .then((answer) => { ... })
+    Each row contains:
+        row.ID (int)  the drugID in the pharmacopeia
+        row.NAME (string) the name of the drug
+*/
 function getDrugNamesFromIDs(drugIDs){
     var q = `
         SELECT ID, NAME
@@ -53,9 +60,9 @@ app.get('/api/v1/list', (req,res) => {
 An api endpoint that returns all of the prescriptions associated with a patient ID
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/prescriptions/01"
+        >>> curl "http://localhost:5000/api/v1/prescriptions/1"
     To be used in Axois call:
-        .get("api/v1/prescriptions/01")
+        .get("api/v1/prescriptions/1")
 Returns:
     A list of prescription objects each with fields: [
         prescriptionID, patientID, drugID, fillDates, 
@@ -64,13 +71,13 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', (req,res) => {
-    var patientID = req.params.patientID;
+    var patientID = parseInt(req.params.patientID);
     var prescriptions = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
     var toSend = [];
-    prescriptions.forEach(p => {
-        if (p.patientID === patientID) toSend.push(p);
+    prescriptions.forEach(prescription => {
+        if (prescription.patientID === patientID) toSend.push(prescription);
     });
 
     // if no prescriptions for a patient ID, return early
@@ -99,8 +106,8 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     getDrugNamesFromIDs(drugIDs)
     .then((answer) => {
         for (var i = 0; i < toSend.length; i++){
-            var drug = answer.rows.filter((r) => {
-                return (r.ID === toSend[i].drugID);
+            var drug = answer.rows.filter((row) => {
+                return (row.ID === toSend[i].drugID);
             })[0];
             toSend[i].drugName = drug.NAME;
         }
@@ -119,9 +126,9 @@ An api endpoint that returns the prescription associated with a
 given prescription ID.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/prescriptions/single/0002"
+        >>> curl "http://localhost:5000/api/v1/prescriptions/single/2"
     To be used in Axois call:
-        .get("/api/v1/prescriptions/single/0002")
+        .get("/api/v1/prescriptions/single/2")
 Returns:
     A single prescription object with fields: [
         prescriptionID, patientID, drugID, fillDates, 
@@ -130,16 +137,16 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
-    var prescriptionID = req.params.prescriptionID;
+    var prescriptionID = parseInt(req.params.prescriptionID);
     var prescriptions = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
-    var p = prescriptions.find( function(elem) {
+    var prescription = prescriptions.find( function(elem) {
         return elem.prescriptionID === prescriptionID;
     });
 
     // '==' catches both null and undefined
-    if (p == null) {
+    if (prescription == null) {
         console.log('/api/v1/prescriptions/single: No ID match');
         res.json({});
         return;
@@ -147,22 +154,22 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     
     // if no connection string (Travis testing), fill drugName with dummy info
     if (!conn.MySQL) {
-        p.drugName = "drugName";
-        res.json(p);
+        prescription.drugName = "drugName";
+        res.json(prescription);
         return;
     }
 
     // Look up the drug name given the ID in MySQL
-    getDrugNamesFromIDs([p.drugID])
+    getDrugNamesFromIDs([prescription.drugID])
     .then((answer) => {
         if (answer.rows.length === 0) {
-            p.drugName = '';
+            prescription.drugName = '';
         } else {
-            p.drugName = answer.rows[0].NAME;
+            prescription.drugName = answer.rows[0].NAME;
         }
         
         console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
-        res.json(p);
+        res.json(prescription);
     })
     .catch((error) => {
         console.log("/api/v1/prescriptions/single: error: ", error);
@@ -194,10 +201,10 @@ Returns:
     List of patients with all personal information:
     [
         {
-            "first":"jacob",
-            "last":"krantz",
-            "patientID":"01",
-            "dob":"10-05-1996"
+            "first": "jacob",
+            "last": "krantz",
+            "patientID": 1,
+            "dob": "10-05-1996"
         },
         ... 
     ]
@@ -245,20 +252,20 @@ About:
     TODO: restrict query to a single prescriber.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/patients/01"
+        >>> curl "http://localhost:5000/api/v1/patients/1"
     To be used in Axois call:
-        .get("/api/v1/patients/01")
+        .get("/api/v1/patients/1")
 Returns:
     Patient info object with all personal information:
     {
-        "first":"jacob",
-        "last":"krantz",
-        "patientID":"01",
-        "dob":"10-05-1996"
+        "first": "jacob",
+        "last": "krantz",
+        "patientID": 1,
+        "dob": "10-05-1996"
     }
 */
 app.get('/api/v1/patients/:patientID', (req,res) => {
-    var patientID = req.params.patientID;
+    var patientID = parseInt(req.params.patientID);
 
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
