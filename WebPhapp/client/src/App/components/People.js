@@ -10,7 +10,7 @@ class People extends Component {
         <tr key={person.patientID}>
           <td>
           <a href = {"/patient?ID=" + person.patientID}>
-          {person.patientID}</a>
+              {person.patientID}</a>
           </td>
           <td>
             <a href = {"/patient?ID=" + person.patientID}>
@@ -35,9 +35,9 @@ class People extends Component {
   render() {
     return (
       // Returns a table of patients styled according to the Argon style system
-      <table class="table table-hover">
+      <table className="table table-hover">
       <tbody>
-        <tr class="table-primary">
+        <tr className="table-primary">
           <th scope="col">ID</th>
           <th scope="col" >First Name</th>
           <th scope="col" >Last Name</th>

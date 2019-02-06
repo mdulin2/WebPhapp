@@ -7,6 +7,7 @@ class PatientSearch extends Component {
   // Initialize the state
   state = {
     people: [],
+    patientID: "",
     firstName: "",
     lastName:""
   };
@@ -19,9 +20,9 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people }));
   }
 
-    // Updating text in the patient id state
-    onKeyDownPatientID = event => {
-      this.setState({patientID: event.target.value});
+  // Updating text in the patient id state
+  onKeyDownPatientID = event => {
+      this.setState({patientID: String(event.target.value)});
     }
 
   // Updating text in the first name state
@@ -43,12 +44,20 @@ class PatientSearch extends Component {
     // String interpolation
     var idSearchQuery = `/api/v1/patients/${patientID}`;
     var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    
+    if (patientID) {
+      axios
+      .get(idSearchQuery)
+      .then(results => results.data)
+      .then(people => this.setState({ people: [people] }));
+    }
 
-    axios
-      // .get(idSearchQuery)
+    else if (firstName || lastName) {
+      axios
       .get(nameSearchQuery)
       .then(results => results.data)
       .then(people => this.setState({ people }));
+    }
   }
 
   render() {
@@ -67,7 +76,7 @@ class PatientSearch extends Component {
                       <div className="row">
                           <div className="col-6 collapse-brand">
                               <a href="../../index.html">
-                                  <img src="../../../public/assets/img/brand/blue.png"/>
+                                  {/* <img src="../../../public/assets/img/brand/blue.png"/> */}
                               </a>
                           </div>
                           <div className="col-6 collapse-close">
@@ -112,28 +121,28 @@ class PatientSearch extends Component {
         {/* Returns a text fields to search patients styled according to the Argon style system */}
         <form role="form">
       
-          <div class="form-group mb-3">
-            <div class="input-group input-group-alternative">
-              <div class="input-group-prepend">
-                <span class="input-group-text"></span>
+          <div className="form-group mb-3">
+            <div className="input-group input-group-alternative">
+              <div className="input-group-prepend">
+                <span className="input-group-text"></span>
               </div>
               <input 
-                class="form-control" 
+                className="form-control" 
                 placeholder="Patient ID" 
-                type="p"
+                type="text"
                 value={this.state.patientID}
                 onChange={this.onKeyDownPatientID}
               />
             </div>
           </div>
 
-          <div class="form-group">
-            <div class="input-group input-group-alternative">
-              <div class="input-group-prepend">
-                <span class="input-group-text"></span>
+          <div className="form-group">
+            <div className="input-group input-group-alternative">
+              <div className="input-group-prepend">
+                <span className="input-group-text"></span>
               </div>
               <input 
-                class="form-control" 
+                className="form-control" 
                 placeholder="First Name" 
                 type="p"
                 value={this.state.firstName}
@@ -142,13 +151,13 @@ class PatientSearch extends Component {
             </div>
           </div>
 
-          <div class="form-group">
-            <div class="input-group input-group-alternative">
-              <div class="input-group-prepend">
-                <span class="input-group-text"></span>
+          <div className="form-group">
+            <div className="input-group input-group-alternative">
+              <div className="input-group-prepend">
+                <span className="input-group-text"></span>
               </div>
               <input 
-                class="form-control" 
+                className="form-control" 
                 placeholder="Last Name" 
                 type="p"
                 value={this.state.lastName}
@@ -157,18 +166,20 @@ class PatientSearch extends Component {
             </div>
           </div>
 
-          <div class="text-center">
+          <div className="text-center">
             <button type="button" className="btn btn-primary my-4"
               onClick={this.onSearchPatients}>
               Search
             </button>
           </div>
+          
         </form>
 
         <People patientList={this.state.people}/>
+
       </div>
     );
   }
 }
 
-export default PatientSearch;
+export default PatientSearch; 
