@@ -43,7 +43,9 @@ class People extends Component {
           <th scope="col" >Last Name</th>
           <th scope="col">Date Of Birth</th>
         </tr>
+
         {this.displayPeople()}
+
       </tbody>
       </table>
     );
@@ -63,3 +65,4 @@ People.propTypes = {
 }
 
 export default People;
+

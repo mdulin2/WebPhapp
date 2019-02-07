@@ -5,6 +5,7 @@ import Home from "./Home";
 
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
+import PrescriptionAdd from "./PrescriptionAdd.js"
 
 class App extends Component {
   render() {
@@ -14,6 +15,7 @@ class App extends Component {
           <Route exact path="/" component={Home} />
           <Route path="/patient" component={Patient} />
           <Route path="/patientSearch" component={PatientSearch} />
+          <Route path="/addPrescription" component={PrescriptionAdd}/>
         </Switch>
       </div>
     );
