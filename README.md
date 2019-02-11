@@ -10,14 +10,16 @@ In the directory `Webphapp/Webphapp/backend/` is the file `connections.js`. This
 ## Unit Testing  
 Run all tests before changing any files, opening a PR, updating a PR, and reviewing a PR.  
 
-Back end tests:  
+All tests can be ran together by calling `./testRunner.sh`. This automatically wil call `npm install` for both the frontend and backend. To skip this step, call `./testRunner.sh -n` instead.  
+
+Back end tests individually:  
 ```
 cd WebPhapp/backend/
 npm install
 npm run test
 ```  
 
-Front end tests:  
+Front end tests individually:  
 ```
 cd WebPhapp/client/
 npm install
