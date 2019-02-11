@@ -44,7 +44,7 @@ class PatientSearch extends Component {
     // String interpolation
     var idSearchQuery = `/api/v1/patients/${patientID}`;
     var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
-    
+
     if (patientID) {
       axios
       .get(idSearchQuery)
@@ -63,72 +63,17 @@ class PatientSearch extends Component {
   render() {
 
     return (
-        // Returns a navigation bar styled according to the Argon style system
-        <div className="form-group">
-          <nav className="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
-            <div className="container">
-                <a className="navbar-brand" href="#">Patient Lookup</a>
-                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbar-default">
-                    <div className="navbar-collapse-header">
-                      <div className="row">
-                          <div className="col-6 collapse-brand">
-                              <a href="../../index.html">
-                                  {/* <img src="../../../public/assets/img/brand/blue.png"/> */}
-                              </a>
-                          </div>
-                          <div className="col-6 collapse-close">
-                              <button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
-                                  <span></span>
-                                  <span></span>
-                              </button>
-                          </div>
-                      </div>
-                    </div>
-                    <ul className="navbar-nav ml-lg-auto">
-                        <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-favourite-28"></i>
-                                <span className="nav-link-inner--text d-lg-none">Discover</span>
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-notification-70"></i>
-                                <span className="nav-link-inner--text d-lg-none">Profile</span>
-                            </a>
-                        </li>
-                        <li className="nav-item dropdown">
-                            <a className="nav-link nav-link-icon" href="#" id="navbar-default_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i className="ni ni-settings-gear-65"></i>
-                                <span className="nav-link-inner--text d-lg-none">Settings</span>
-                            </a>
-                            <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-default_dropdown_1">
-                                <a className="dropdown-item" href="#">Action</a>
-                                <a className="dropdown-item" href="#">Another action</a>
-                                <div className="dropdown-divider"></div>
-                                <a className="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <br/>
-
-        {/* Returns a text fields to search patients styled according to the Argon style system */}
+      <div className="form-group">
         <form role="form">
-      
+
           <div className="form-group mb-3">
             <div className="input-group input-group-alternative">
               <div className="input-group-prepend">
                 <span className="input-group-text"></span>
               </div>
-              <input 
-                className="form-control" 
-                placeholder="Patient ID" 
+              <input
+                className="form-control"
+                placeholder="Patient ID"
                 type="text"
                 value={this.state.patientID}
                 onChange={this.onKeyDownPatientID}
@@ -141,9 +86,9 @@ class PatientSearch extends Component {
               <div className="input-group-prepend">
                 <span className="input-group-text"></span>
               </div>
-              <input 
-                className="form-control" 
-                placeholder="First Name" 
+              <input
+                className="form-control"
+                placeholder="First Name"
                 type="p"
                 value={this.state.firstName}
                 onChange={this.onKeyDownFirstName}
@@ -156,9 +101,9 @@ class PatientSearch extends Component {
               <div className="input-group-prepend">
                 <span className="input-group-text"></span>
               </div>
-              <input 
-                className="form-control" 
-                placeholder="Last Name" 
+              <input
+                className="form-control"
+                placeholder="Last Name"
                 type="p"
                 value={this.state.lastName}
                 onChange={this.onKeyDownLastName}
@@ -172,7 +117,7 @@ class PatientSearch extends Component {
               Search
             </button>
           </div>
-          
+
         </form>
 
         <People patientList={this.state.people}/>
@@ -182,4 +127,4 @@ class PatientSearch extends Component {
   }
 }
 
-export default PatientSearch; 
+export default PatientSearch;
