@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 // establish a connection to the remote MySQL DB
 if(conn.MySQL){
-    var mysql = require('mysql')
+    var mysql = require('mysql2');
     var connection = mysql.createConnection(conn.MySQL);
 }
 
@@ -27,14 +27,19 @@ Returns: Promise.
         row.NAME (string) the name of the drug
 */
 function getDrugNamesFromIDs(drugIDs){
+
+    /*Example of a prepared statement.
+    Use the question mark(?) to denote the values you want to replace.
+    Then, as a second parameter, include an array of the values to replace.
+    */
     var q = `
         SELECT ID, NAME
         FROM seniordesign1.pharmacopeia
-        WHERE ID IN (` + drugIDs.toString() + `)
+        WHERE ID IN (?)
     `;
 
     return new Promise((resolve, reject) => {
-        connection.query(q, (error, rows, fields) => {
+        connection.query(q,[drugIDs.toString()], (error, rows, fields) => {
             if (error) reject(error);
             resolve({rows, fields});
         });
@@ -70,8 +75,8 @@ Examples:
         .get("api/v1/prescriptions/1")
 Returns:
     A list of prescription objects each with fields: [
-        prescriptionID, patientID, drugID, fillDates, 
-        writtenDate, quantity, daysFor, refillsLeft, 
+        prescriptionID, patientID, drugID, fillDates,
+        writtenDate, quantity, daysFor, refillsLeft,
         prescriberID, dispenserID, cancelled, cancelDate, drugName
     ]
 */
@@ -86,7 +91,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     });
 
     // if no prescriptions for a patient ID, return early
-    var msg = 'Sent ' + toSend.length.toString() + 
+    var msg = 'Sent ' + toSend.length.toString() +
                 ' prescription(s) for patient ID ' + patientID.toString();
     if (toSend.length === 0) {
         console.log(msg);
@@ -108,17 +113,21 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         return prescription.drugID;
     })
 
+
     getDrugNamesFromIDs(drugIDs)
     .then((answer) => {
         for (var i = 0; i < toSend.length; i++){
             var drug = answer.rows.filter((row) => {
                 return (row.ID === toSend[i].drugID);
-            })[0];
-            toSend[i].drugName = drug.NAME;
+            });
+
+            // Could be undefined on return
+            if(drug.length !== 0)
+              toSend[i].drugName = drug[0].NAME;
         }
 
         console.log(msg);
-        res.json(toSend);
+
     })
     .catch((error) => {
         console.log("/api/v1/prescriptions: error: ", error);
@@ -126,7 +135,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     });
 
     res.json(toSend);
-    console.log('Sent ' + toSend.length.toString() + 
+    console.log('Sent ' + toSend.length.toString() +
                 ' prescription(s) for patient ID ' + patientID.toString());
 });
 
@@ -183,7 +192,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
         res.json({});
         return;
     }
-    
+
     // if no connection string (Travis testing), fill drugName with dummy info
     if (!conn.MySQL) {
         prescription.drugName = "drugName";
@@ -199,7 +208,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
         } else {
             prescription.drugName = answer.rows[0].NAME;
         }
-        
+
         console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
         res.json(prescription);
     })
@@ -238,7 +247,7 @@ Returns:
             "patientID": 1,
             "dob": "10-05-1996"
         },
-        ... 
+        ...
     ]
 
 Relevant Express Docs:
@@ -252,7 +261,7 @@ app.get('/api/v1/patients', (req,res) => {
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
 
-    // Searching for substrings 
+    // Searching for substrings
     var matchingPatients = all_patients.filter(function(elem) {
         if( first === undefined && last === undefined ){
             // if no query given, return all patients
@@ -279,8 +288,8 @@ app.get('/api/v1/patients', (req,res) => {
 /*
 About:
     An api endpoint that returns the info about a patient given a specific
-    patient ID. Patient data temporarily includes date of birth, first and 
-    last name, and patient ID. 
+    patient ID. Patient data temporarily includes date of birth, first and
+    last name, and patient ID.
     TODO: restrict query to a single prescriber.
 Examples:
     Directly in terminal:
