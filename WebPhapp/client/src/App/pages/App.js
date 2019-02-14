@@ -17,7 +17,7 @@ class App extends Component {
           <Route exact path="/" component={Home} />
           <Route path="/patient" component={Patient} />
           <Route path="/patientSearch" component={PatientSearch} />
-          <Route path="/addPrescription" component={PrescriptionAdd}/>
+          <Route path="/prescriptionAdd" component={PrescriptionAdd}/>
         </Switch>
       </div>
     );

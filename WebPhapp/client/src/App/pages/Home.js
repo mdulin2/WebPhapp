@@ -17,6 +17,16 @@ class Home extends Component {
             </button>
           </div>
         </Link>
+        <Link to={"./prescriptionAdd"}>
+          <div className="text-center">
+            <button 
+              type="button" 
+              className="btn btn-primary my-4"
+              variant="raised">
+              Add Prescription
+            </button>
+          </div>
+        </Link>
       </div>
     );
   }

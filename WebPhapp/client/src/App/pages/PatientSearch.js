@@ -30,7 +30,7 @@ class PatientSearch extends Component {
     this.setState({firstName: event.target.value});
   }
 
-  // Updating text in the first last state
+  // Updating text in the last name state
   onKeyDownLastName = event => {
     this.setState({lastName: event.target.value});
   }
