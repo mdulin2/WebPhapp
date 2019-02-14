@@ -90,3 +90,5 @@ coverage
 # Remote DB credentials file
 connections.js
 
+# Quorum maker directory
+./WebPhapp/quorum-maker

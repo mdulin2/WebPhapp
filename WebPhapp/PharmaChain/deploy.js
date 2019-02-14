@@ -2,12 +2,12 @@ let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
 
-/* Script to deploy a new version of the patient contract.
-    Returns the memory address of the newly deployed contract.
-    Update read, write scripts with new address.
+/* Function to deploy a new version of the patient contract.
+    Returns the memory address of the newly deployed contract,
+    and writes the address to a txt file.
  */
 
-async function deploy(contractName){
+async function deploy(){
 
     // This is actually connecting to the node!
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -39,4 +39,4 @@ async function deploy(contractName){
     return contractInstance.options.address;
 }
 
-deploy('Patient.sol');
+deploy();

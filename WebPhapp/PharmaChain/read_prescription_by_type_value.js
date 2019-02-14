@@ -4,7 +4,7 @@ let net = require("net");
 
 let args = process.argv
 
-/*  This script takes a type and a value, and returns prescriptions
+/*  This function takes a type and a value, and returns prescriptions
     that have a type, of the first index and, a value of the second index.
     
 

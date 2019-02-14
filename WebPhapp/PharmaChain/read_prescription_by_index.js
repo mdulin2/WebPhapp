@@ -2,7 +2,7 @@ let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
 
-/*  This script takes an index and returns a prescription from the drugChain.
+/*  This function takes an index and returns a prescription from the drugChain.
     User input: prescription index on the drugChain.
     Argument list: index
     Example usage: node read_prescrip_index.js 0 

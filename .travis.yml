@@ -3,7 +3,7 @@ sudo:
 
 before_install:
   - npm i -g npm@6.4.1
-  - sudo chmod +x ./WebPhapp/PharmaChain/install.sh
+  - sudo chmod +x ./WebPhapp/PharmaChain/install_travis.sh
   - sudo chmod +x ./testRunner.sh
 
 language: node_js
@@ -12,7 +12,7 @@ node_js:
   - "8"
 
 script:
-  - sudo ./WebPhapp/PharmaChain/install.sh
+  - sudo ./WebPhapp/PharmaChain/install_travis.sh
   - sudo ./testRunner.sh
 
 cache:

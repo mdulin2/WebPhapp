@@ -40,3 +40,67 @@ To fix the issue, run this in your console:
 
 - To read about why this is the case:  
 https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers  
+
+### Running the Blockchain
+**Starting the Blockchain**
+- Go into your quorum-maker folder:
+```
+cd WebPhapp/quorum-maker/TestNetwork
+```
+- Start up the docker containers which serve as nodes in the network:
+```
+sudo docker-compose up &
+```
+- Unlock the nodes in the network so that you can run node scripts.
+```
+sudo ./modular.sh
+```
+**Compiling Contracts**
+- When using a fresh install, or after changing solidity contracts,
+you should recompile and test the contracts in the Pharmachain folder.
+(Your blockchain should be running in already):
+```
+cd WebPhapp/PharmaChain
+sudo truffle migrate
+sudo truffle test
+```
+- Once the blockchain is updated with the newest compiled version of your contracts, you can use premade node.js scripts to interact with the blockchain.
+
+**Premade Scripts**
+- Deploy newly compiled contracts to chain.
+```
+node deploy.js
+```
+
+- Write prescription to blockchain example:
+```
+node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0
+```
+
+- Read prescription by index example:
+```
+node read_prescrip_index.js 0
+```
+
+- Read prescription of a specific type, value. For example, return prescriptions with patientID = 0:
+```
+node read_prescription_type_value.js 0 0
+```
+
+- Update prescription with new values:
+```
+node update_prescription.js 0 1 2 4 true 8
+``` 
+**Troubleshooting Blockchain**
+- If you see the following code:
+
+```
+rpc call eth_coinbase() on http://localhost:22000: Post http://localhost:22000: dial tcp 127.0.0.1:22000: connect: connection refused
+```
+
+Delete the quorum-maker folder, and reclone it.
+```
+cd WebPhapp/
+sudo rm -r quorum-maker
+git clone https://github.com/Pharmachain/quorum-maker
+```

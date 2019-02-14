@@ -1,9 +1,8 @@
 #Pharmachain GitHub Pulls
-cd ~
+cd ..
 git clone https://github.com/Pharmachain/quorum-maker
-#git clone https://github.com/Pharmachain/PharmaChain
-git clone https://github.com/Pharmachain/WebPhapp
-#Docker, required for quorum maker
+
+#Install Docker
 apt-get -y install docker-compose
 apt-get -y install docker.io
 
@@ -13,7 +12,6 @@ apt-get -y update
 apt-get -y install ethereum
 
 #Node version manager
-cd ~/PharmaChain
 apt-get -y install curl
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
@@ -24,6 +22,7 @@ nvm use 10.0
 
 #npm install. This part is currently buggy, and produces warnings.
 #TODO: fix npm/node install issues
+cd PharmaChain
 apt-get -y install npm
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 apt-get install -y nodejs
@@ -39,7 +38,7 @@ sudo npm install @babel/runtime@latest
 #npm install
 
 #Quorum Maker Setup
-cd ~/quorum-maker
+cd ../quorum-maker
 ./setup.sh &
 
 
