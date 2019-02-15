@@ -142,36 +142,81 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 /*
 About:
 Attempts to add a prescription for a user, while also doing validation.
-Expects an object such as:
-{patientID,
-drugID,
-quantity,
-daysValid,
-refills,
-prescriberID,
-dispensorID
+Status of 200 if successful, 400 otherwise.
+Expects an object with all integer fields:
+{
+    patientID,
+    drugID,
+    quantity,
+    daysValid,
+    refills,
+    prescriberID,
+    dispensorID
 }
     Directly in terminal:
-        By both first and last name:
-            >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":"","daysValid":0,"refills":0,"prescriberID":0,"dispensorID":0}
-  To be used in Axois call:
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+    To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
             ....
         }
 */
+app.post('/api/v1/prescriptions/add',(req,res) => {    
+    const prescription = req.body;
 
-app.post('/api/v1/prescriptions/add',(req,res) => {
-  const prescription = req.body;
-  console.log(prescription);
-  //TODO
-  /*
-    Validate all of the data coming in:
-      - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
-      - Validate the drugID, dispensorID, patient all exist.
-    Add the prescription to the blockchain and index this prescription.
-  */
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
 
+    // validate fields exist that should
+    fields = [
+        prescription.patientID,
+        prescription.drugID,
+        prescription.quantity,
+        prescription.daysValid,
+        prescription.refills,
+        prescription.prescriberID,
+        prescription.dispenserID
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        return finish("Required prescription field(s) are null or undefined.", false)
+    }
+
+    // validate fields are of proper type
+    for (var key in prescription){
+        if(key === "quantity"){
+            if(typeof prescription[key] !== "string"){
+                return finish("Prescription field '" + key + "' should be of type String.", false);
+            }
+        } else if( !Number.isInteger(prescription[key]) ){
+            return finish("Prescription field '" + key + "' should be of type Integer.", false);
+        }
+    }
+
+    // validate there are no extraneous fields
+    if(Object.keys(prescription).length > fields.length){
+        return finish("Prescription input has too many fields.", false);
+    }
+
+    // other validation here should include:
+    //  - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
+    //  - Validate the drugID, dispensorID, patient all exist.
+    // we are ignoring this for now and will come back to it.
+
+    // Add derived fields to the prescription
+    prescription.fillDates = []; // array of integer dates filled by the dispenser.
+    prescription.writtenDate = new Date().getTime(); // time is in milliseconds since 1970 epoch.
+    prescription.cancelDate = -1; // -1 means no date- not cancelled.
+
+    // TODO: query blockchain to get current highest prescriptionID
+    prescription.prescriptionID = -1;
+
+    // Add the prescription to the blockchain and index this prescription.
+    return finish("TODO: build prescription add to blockchain", true);
 });
 
 // An api endpoint that returns the prescription associated with a

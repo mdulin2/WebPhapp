@@ -20,9 +20,9 @@ describe("loading express", function() {
   });
 
 
-  // ------------------------------------------------------
-  //             Tests: /api/vi/prescriptions
-  // ------------------------------------------------------
+  // // ------------------------------------------------------
+  // //             Tests: /api/vi/prescriptions
+  // // ------------------------------------------------------
 
 
   // ensure that given a prescription ID, the get request
@@ -202,6 +202,86 @@ describe("loading express", function() {
       .end(done);
   });
 
+
+  // ------------------------------------------------------
+  //             Tests: /api/v1/prescriptions/add
+  // ------------------------------------------------------
+
+  it("test-route-prescriptions-add", function(done) {
+    request(server)
+    .post("/api/v1/prescriptions/add")
+    .send({
+      patientID: 0,
+      drugID: 0,
+      quantity:"0",
+      daysValid:0,
+      refills:0,
+      prescriberID:0,
+      dispenserID:0
+    })
+    .expect(200)
+    .expect(function(res) {
+      if (res.body !== true) throw new Error('Valid prescription was not accepted.');
+    })
+    .end(done);
+  });
+
+  it("test-route-prescriptions-add-bad1", function(done) {
+    request(server)
+    .post("/api/v1/prescriptions/add")
+    .send({
+      patientID: 0,
+      drugID: 0,
+      quantity:"0",
+      daysValid:0,
+      refills:0,
+      prescriberID:0,
+      dispenserID:0,
+      extraField:0
+    })
+    .expect(400)
+    .expect(function(res) {
+      if (res.body !== false) throw new Error('Too many fields went without validation.');
+    })
+    .end(done);
+  });
+
+  it("test-route-prescriptions-add-bad2", function(done) {
+    request(server)
+    .post("/api/v1/prescriptions/add")
+    .send({
+      patientID: "this should not be a string",
+      drugID: 0,
+      quantity:"0",
+      daysValid:0,
+      refills:0,
+      prescriberID:0,
+      dispenserID:0,
+    })
+    .expect(400)
+    .expect(function(res) {
+      if (res.body !== false) throw new Error('fields not properly checked for type.');
+    })
+    .end(done);
+  });
+
+  it("test-route-prescriptions-add-bad3", function(done) {
+    request(server)
+    .post("/api/v1/prescriptions/add")
+    .send({
+      drugID: 0,
+      quantity:"0",
+      daysValid:0,
+      refills:0,
+      prescriberID:0,
+      dispenserID:0,
+    })
+    .expect(400)
+    .expect(function(res) {
+      if (res.body !== false) throw new Error('should not create prescription with missing field.');
+    })
+    .end(done);
+  });
 
   // ------------------------------------------------------
   //             Tests: other
