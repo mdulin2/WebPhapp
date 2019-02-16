@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import axios from "axios";
-import PrescriptionRow from "../components/PrescriptionRow";
+import PrescriptionTable from "../components/PrescriptionTable";
 import qs from 'qs';
 
 class Patient extends Component {
   // Initialize the state
   state = {
-    prescription: []
+    prescriptions: []
   };
 
   // Fetch the prescription on first mount
@@ -26,48 +26,32 @@ class Patient extends Component {
       // String interpolation.
       .get(`/api/v1/prescriptions/${patientID}`)
       .then(results => results.data)
-      .then(prescription => this.setState({ prescription }));
+      .then(prescriptions => this.setState({ prescriptions }));
   };
 
-  // displayPrescription() displays the properties of a prescription using PrescriptionRow
+  // displayPrescriptions() displays the properties of a prescription using PrescriptionTable
   // @return: returns all prescriptions for a patient id
-  displayPrescriptions = () =>
-    this.state.prescription.map(prescription => (
-      <PrescriptionRow
-        // unique identifier or key is the prescription ID
-        key={prescription.prescriptionID}
-        prescriptionID={prescription.prescriptionID}
-        patientID={prescription.patientID}
-        drugID={prescription.drugID}
-        filled={prescription.filled}
-        fillDates={prescription.fillDates}
-        writtenDate={prescription.writtenDate}
-        oldestFillDate={prescription.oldestFillDate}
-        quantity={prescription.quantity}
-        daysFor={prescription.daysFor}
-        refillsLeft={prescription.refillsLeft}
-        prescriberID={prescription.prescriberID}
-        dispenserID={prescription.dispenserID}
-        cancelled={prescription.cancelled}
-        cancelDate={prescription.cancelDate}
+  displayPrescriptions = () => {
+    return(
+      <PrescriptionTable
+        prescriptions = {this.state.prescriptions}
       />
-    ));
+    )
+  }
 
   render() {
-    const prescription = this.state.prescription;
-
+    const prescriptions = this.state.prescriptions;
     return (
       <div className="App">
-        <h1>Prescription</h1>
         {/* Check to see if any prescriptions are found*/}
-        {prescription ? (
+        {prescriptions ? (
           <div>
             {/* Render the prescription */}
             {this.displayPrescriptions()}
           </div>
         ) : (
           <div>
-            <h2>No Prescription Found</h2>
+            <h2>No Prescriptions Found</h2>
           </div>
         )}
       </div>
