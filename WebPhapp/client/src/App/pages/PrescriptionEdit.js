@@ -6,7 +6,6 @@ class PrescriptionEdit extends Component {
 
   constructor(props){
     super(props);
-
     //TODO: Access control pattern here to check for proper usertype.
 
     this.state = {cancelDate: ""}
