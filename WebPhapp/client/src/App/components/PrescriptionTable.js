@@ -1,22 +1,65 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-  
+import axios from "axios";
+
 class PrescriptionTable extends Component {
+
+    constructor(props){
+        super(props);
+
+        // Check for type of user with some API call.
+        const user = 'prescriber';
+        this.state={
+            user: user
+        }
+    }
+
+    // Gets the events id, to cancel the proper prescription.
+    onCancelClick = event => {
+
+      // Probably add some validation to make sure the user wants to delete this.
+      const cancelQuery = `/api/v1/prescriptions/cancel/${event.target.id}`
+      axios
+      .get(cancelQuery)
+      .then(results => results.data);
+
+      //TODO Grey out cancelled prescription.
+      this.props.getPrescriptions();
+    }
+
     // Displays all prescriptions for a patient
     displayPrescriptions = () => {
         return this.props.prescriptions.map(prescription => {
             var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
             var cancel = prescription.cancelled ? "Yes" : "No";
-            var cancelDate = prescription.cancelDate === "" ? "TBD" : prescription.cancelDate; 
+            var cancelDate = prescription.cancelDate === -1 ? "TBD" : prescription.cancelDate;
 
             return(
                 <tr key={prescription.prescriptionID}>
+                     <td>{prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
+                       <div>
+                          <button type = "button"
+                              className = "btn btn-danger"
+                              id = {prescription.prescriptionID}
+                              onClick = {this.onCancelClick}>
+                              X
+                          </button>
+                          <button type = "button"
+                              className = "btn btn-warning"
+                              id = {prescription.prescriptionID}
+                              onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
+                              Edit
+                          </button>
+                        </div>
+                        : ""
+                        }
+                    </td>
                     <td> {prescription.prescriptionID} </td>
                     <td> {prescription.patientID} </td>
                     <td> {prescription.drugID} </td>
                     <td>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className="btn btn-primary"
                             data-container="body"
                             data-toggle="popover"
@@ -45,6 +88,7 @@ class PrescriptionTable extends Component {
             <table className="table table-hover">
             <tbody>
               <tr className="table-primary">
+                <th scope="col"></th>
                 <th scope="col">Prescription ID</th>
                 <th scope="col" >Patient ID</th>
                 <th scope="col" >Drug ID</th>
@@ -58,11 +102,11 @@ class PrescriptionTable extends Component {
                 <th scope="col" >Cancelled</th>
                 <th scope="col" >Cancel Date</th>
               </tr>
-      
+
               {this.displayPrescriptions()}
-      
+
             </tbody>
-            </table>  
+            </table>
         );
     }
 }

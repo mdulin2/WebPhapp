@@ -140,6 +140,59 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 });
 
 /*
+Edits a prescription for a given prescription ID. The prescriptionID is used in order to get the rest of the data for the prescription. The rest of the data points are alterable values.
+
+ Expects on object of shape:
+{
+  prescriptionID,
+  quantity,
+  daysFor,
+  refillsLeft,
+  dispenserID
+}
+
+  Directly in terminal:
+    >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 3,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"dispenserID":0}'
+
+    To be used in an axios call:
+        .post("/api/v1/prescription/edit",{
+            prescriptionID: 0,
+            ....
+        }
+*/
+
+app.post('/api/v1/prescriptions/edit',(req,res) => {
+
+    //TODO auth check needed here with cookie that goes with request headers
+    const changedPrescription = req.body;
+
+    // Should become actuall, non-static data
+    var prescriptions = readJsonFileSync(
+        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+    var prescription = prescriptions.find( function(elem) {
+        return elem.prescriptionID === changedPrescription.prescriptionID;
+    });
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
+    // Ensures that a filled or cancelled prescription cannot be altered.
+    if(prescription.cancelDate !== -1 || prescription.fillDates.length !== 0){
+      // Jacob? What to send here?
+      res.send({})
+    }
+
+
+    //TODO Go into blockchain to call changing functions...The data for this is in the changedPrescription data.
+    return finish("TODO: build prescription edit to blockchain", true);
+});
+
+/*
 About:
 Attempts to add a prescription for a user, while also doing validation.
 Status of 200 if successful, 400 otherwise.
@@ -161,7 +214,7 @@ Expects an object with all integer fields:
             ....
         }
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {    
+app.post('/api/v1/prescriptions/add',(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -217,6 +270,24 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
     // Add the prescription to the blockchain and index this prescription.
     return finish("TODO: build prescription add to blockchain", true);
+});
+
+// An api endpoint that cancels the prescription associated with a
+// given prescription ID.
+// example: http://localhost:5000/api/v1/prescriptions/cancel/2
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+    //TODO Check for auth to do this.
+    //TODO Check for valid prescriptionID
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
+    //TODO Cancel the prescription on the blockchain
+    return finish("TODO: build prescription cancel to blockchain", true);
 });
 
 // An api endpoint that returns the prescription associated with a
