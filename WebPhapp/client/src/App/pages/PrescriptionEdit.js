@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import qs from 'qs';
+import { Link } from "react-router-dom";
 
 class PrescriptionEdit extends Component {
 
@@ -73,123 +74,146 @@ Fields:
 - Drug ID        - Can't change
 - Filled Dates   - If filled, cannot change
 - Written Date   - Static
-- quantity       - Changable?
+- Quantity       - Changable?
 - Days for       - Changeable?
 - Refills left   - Changeable?
 - Prescriber ID  - Can't change
-- Dispensor ID   - Changable?
+- Dispenser ID   - Changable?
 - Cancelled      - If cancelled, cannot uncancel it or recancel it.
 - Cancel Date    -
-
 */
+
   render() {
     return (
     /* Logic to render text conditionally */
       <div className="App">
       { this.state.cancelDate === "" ? "Loading..." :
         this.state.cancelDate === -1 && this.state.fillDates.length === 0 ?
-        <form>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input disabled
-                type="p"
-                className="form-control"
-                placeholder={`Prescription ID: ${this.state.prescriptionID}`}/>
+        <div className="col-xl-8 order-xl-1 center">
+        <div className="card bg-secondary shadow">
+          <div className="card-header bg-white border-0">
+              <div className="row align-items-center">
+                <div className="col-8 text-left">
+                  <h3 className="mb-0">Prescription Edit</h3>
+                </div>
+              </div>
+          </div>
+          <div className="card-body text-left">
+          <form>
+            <div className="pl-lg-4">
+            <div className="row">
+              <div className="col-lg">
+                <div className="form-group focused">
+                  <label className="form-control-label">Prescription ID</label>
+                  <input disabled
+                  type="p"
+                  className="form-control"
+                  placeholder={`Prescription ID: ${this.state.prescriptionID}`}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Patient ID</label>
+                  <input disabled
+                  type="p"
+                  className="form-control"
+                  placeholder={`Patient ID: ${this.state.patientID}`}
+                  onChange={this.onKeyDownPatientID}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Drug ID</label>
+                  <input disabled
+                  type="p"
+                  placeholder={`Drug ID: ${this.state.drugID}`}
+                  className="form-control"/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Prescriber ID</label>
+                  <input disabled
+                  type="p"
+                  className="form-control"
+                  placeholder={`Prescriber ID: ${this.state.prescriberID}`}/>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input disabled
-                type="p"
-                className="form-control"
-                placeholder={`Patient ID: ${this.state.patientID}`}
-                onChange={this.onKeyDownPatientID}/>
+            <hr class="my-4"></hr>
+            <div className="row">
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Quantity</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Quantity"
+                  value = {this.state.quantity}
+                  onChange={this.onKeyDownQuantity}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Days For</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Days For"
+                  value = {this.state.daysFor}
+                  onChange={this.onKeyDownDaysFor}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Refills Left</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Refills Left"
+                  value = {this.state.refillsLeft}
+                  onChange={this.onKeyDownRefillsLeft}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Dispenser ID</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Dispenser ID"
+                  value = {this.state.dispenserID}
+                  onChange={this.onKeyDownDispenserID}/>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input disabled
-                type="p"
-                placeholder={`Drug ID: ${this.state.drugID}`}
-                className="form-control"/>
-              </div>
+            <Link to={"/patient?ID=" + this.state.patientID}>
+                <button 
+                  type="button" 
+                  className="btn btn-danger my-4"
+                  variant="raised">
+                  Cancel
+                </button>
+            </Link>
+            <nbsp> </nbsp>
+            <button
+              type="button"
+              className ="btn btn-success my-4"
+              onClick={this.onEditPrescription}>
+              Confirm
+            </button>
             </div>
+          </form>
           </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input
-                type="p"
-                className="form-control"
-                placeholder="Quantity"
-                value = {this.state.quantity}
-                onChange={this.onKeyDownQuantity}/>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input
-                type="p"
-                className="form-control"
-                placeholder="Days For"
-                value = {this.state.daysFor}
-                onChange={this.onKeyDownDaysFor}/>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input
-                type="p"
-                className="form-control"
-                placeholder="Refills Left"
-                value = {this.state.refillsLeft}
-                onChange={this.onKeyDownRefillsLeft}/>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input disabled
-                type="p"
-                className="form-control"
-                placeholder={`Prescriber ID: ${this.state.prescriberID}`}/>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input
-                type="p"
-                className="form-control"
-                placeholder="Dispenser ID"
-                value = {this.state.dispenserID}
-                onChange={this.onKeyDownDispenserID}/>
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            className ="btn btn-primary my-4"
-            onClick={this.onEditPrescription}>
-            Edit Prescription
-          </button>
-        </form>
-
+        </div>
+        </div>
         :
-        <b> Not able to alter because the prescription has been fulfilled or cancelled.  </b>
+        <div className="col-8 center">
+          <div class="alert alert-warning" role="alert">
+            <span class="alert-inner--text"><strong>WARNING: </strong> Unable to edit. The prescription may have been fulfilled or cancelled.</span>
+          </div>
+        </div>
       }
-
       </div>
     );
   }
