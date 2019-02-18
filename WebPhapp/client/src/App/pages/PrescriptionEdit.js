@@ -148,7 +148,7 @@ Fields:
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Quantity"
+                  placeholder="Enter the quantity"
                   value = {this.state.quantity}
                   onChange={this.onKeyDownQuantity}/>
                 </div>
@@ -159,7 +159,7 @@ Fields:
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Days For"
+                  placeholder="Enter the number of days for"
                   value = {this.state.daysFor}
                   onChange={this.onKeyDownDaysFor}/>
                 </div>
@@ -170,7 +170,7 @@ Fields:
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Refills Left"
+                  placeholder="Enter the number of refills left"
                   value = {this.state.refillsLeft}
                   onChange={this.onKeyDownRefillsLeft}/>
                 </div>
@@ -181,7 +181,7 @@ Fields:
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Dispenser ID"
+                  placeholder="Enter a Dispenser ID"
                   value = {this.state.dispenserID}
                   onChange={this.onKeyDownDispenserID}/>
                 </div>
