@@ -18,7 +18,7 @@ if(conn.MySQL) {
 
 // use functions for interacting with Blockchain
 if(conn.Blockchain) {
-    var block_helper = require('../PharmaChain/block_helper.js')
+    var block_helper = require('./block_helper.js')
 }
 
 // JSON reader to read in dummy data
@@ -109,7 +109,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     // TODO: query blockchain to get current highest prescriptionID
     prescription.prescriptionID = -1;
 
-    // Add the prescription to the blockchain and index this prescription.
+    // Add the prescription to the blockchain and index this prescription in MySQL.
     return finish("TODO: build prescription add to blockchain", true);
 });
 
@@ -203,46 +203,63 @@ Returns:
         cancelDate,
         drugName
     ]
+Warning:
+    no validation exists for blockchain index yet. See Issue #32 on GitHub.
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-    var prescription = prescriptions.find( function(elem) {
-        return elem.prescriptionID === prescriptionID;
-    });
-
-    // '==' catches both null and undefined
-    if (prescription == null) {
-        console.log('/api/v1/prescriptions/single: No ID match');
-        res.json({});
-        return;
-    }
-
-    // if no connection string (Travis testing), fill drugName with dummy info
-    if (!conn.MySQL) {
-        prescription.drugName = "drugName";
-        res.json(prescription);
-        return;
-    }
-
-    // Look up the drug name given the ID in MySQL
-    getDrugNamesFromIDs([prescription.drugID])
-    .then((answer) => {
-        if (answer.rows.length === 0) {
-            prescription.drugName = '';
-        } else {
-            prescription.drugName = answer.rows[0].NAME;
+    var handlePrescriptionCallback = function(prescription) {
+        // '==' catches both null and undefined
+        if (prescription == null) {
+            console.log('/api/v1/prescriptions/single: No ID match');
+            res.status(400).send({});
+            return;
         }
 
-        console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
-        res.json(prescription);
-    })
-    .catch((error) => {
-        console.log("/api/v1/prescriptions/single: error: ", error);
-        res.json({});
-    });
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescription.drugName = "drugName";
+            console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+            res.json(prescription);
+            return;
+        }
+
+        // Look up the drug name given the ID in MySQL
+        mysql.getDrugNamesFromIDs([prescription.drugID], connection) // prescription.drugID
+        .then((answer) => {
+            if (answer.rows.length === 0) {
+                prescription.drugName = 'drugName not found in Pharmacopoeia';
+            } else {
+                prescription.drugName = answer.rows[0].NAME;
+            }
+
+            console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+            res.json(prescription);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions/single: error: ", error);
+            res.json({});
+        });
+    };
+
+    if(conn.Blockchain){
+        block_helper.read(prescriptionID)
+        .then((answer) => {
+            handlePrescriptionCallback(answer.prescription);
+        }).catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Prescription not found.');
+        });
+    }
+    else { // load prescription from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var prescription = prescriptions.find( function(elem) {
+            return elem.prescriptionID === prescriptionID;
+        });
+        handlePrescriptionCallback(prescription);
+    }
 });
 
 /*
