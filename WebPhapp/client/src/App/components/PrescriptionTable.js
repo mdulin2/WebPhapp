@@ -43,7 +43,7 @@ class PrescriptionTable extends Component {
                             type="button"
                             className={prescription.cancelDate !== -1 ? "btn btn-primary\ disabled".replace(/^"(.*)"$/, '$1') : "btn btn-primary"}
                             data-container="body"
-                            data-toggle="popover"
+                            data-toggle={prescription.cancelDate !== -1 ? "popover" : ""}
                             data-trigger="hover"
                             title="Fill Dates"
                             data-placement="top"
