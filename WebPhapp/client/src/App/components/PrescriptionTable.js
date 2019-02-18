@@ -16,15 +16,14 @@ class PrescriptionTable extends Component {
 
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
+        // Probably add some validation to make sure the user wants to delete this.
+        const cancelQuery = `/api/v1/prescriptions/cancel/${event.target.id}`
+        axios
+        .get(cancelQuery)
+        .then(results => results.data);
 
-      // Probably add some validation to make sure the user wants to delete this.
-      const cancelQuery = `/api/v1/prescriptions/cancel/${event.target.id}`
-      axios
-      .get(cancelQuery)
-      .then(results => results.data);
-
-      //TODO Grey out cancelled prescription.
-      this.props.getPrescriptions();
+        //Grey out cancelled prescription.
+        this.props.getPrescriptions();
     }
 
     // Displays all prescriptions for a patient
@@ -35,34 +34,16 @@ class PrescriptionTable extends Component {
             var cancelDate = prescription.cancelDate === -1 ? "TBD" : prescription.cancelDate;
 
             return(
-                <tr key={prescription.prescriptionID}>
-                     <td>{prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
-                       <div>
-                          <button type = "button"
-                              className = "btn btn-danger"
-                              id = {prescription.prescriptionID}
-                              onClick = {this.onCancelClick}>
-                              X
-                          </button>
-                          <button type = "button"
-                              className = "btn btn-warning"
-                              id = {prescription.prescriptionID}
-                              onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
-                              Edit
-                          </button>
-                        </div>
-                        : ""
-                        }
-                    </td>
+                <tr key={prescription.prescriptionID} className={prescription.cancelDate !== -1 ? "disabled" : ""}>
                     <td> {prescription.prescriptionID} </td>
                     <td> {prescription.patientID} </td>
                     <td> {prescription.drugID} </td>
-                    <td>
+                    <td> 
                         <button
                             type="button"
-                            className="btn btn-primary"
+                            className={prescription.cancelDate !== -1 ? "btn btn-primary\ disabled".replace(/^"(.*)"$/, '$1') : "btn btn-primary"}
                             data-container="body"
-                            data-toggle="popover"
+                            data-toggle={prescription.cancelDate !== -1 ? "popover" : ""}
                             data-trigger="hover"
                             title="Fill Dates"
                             data-placement="top"
@@ -78,6 +59,30 @@ class PrescriptionTable extends Component {
                     <td> {prescription.dispenserID} </td>
                     <td> {cancel} </td>
                     <td> {cancelDate} </td>
+                    <td> {prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
+                       <div>
+                          <button type = "button"
+                              className = "btn btn-danger"
+                              id = {prescription.prescriptionID}
+                              onClick = {this.onCancelClick}>
+                              <span className="btn-inner--icon"><i className="ni-lg ni ni-fat-remove"></i></span>
+                          </button>
+                        </div>
+                        : ""
+                        }
+                    </td>
+                    <td> {prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?   
+                        <div>
+                            <button type = "button"
+                              className = "btn btn-success"
+                              id = {prescription.prescriptionID}
+                              onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
+                              <span className="btn-inner--icon"><i className="ni ni-ruler-pencil"></i></span>
+                            </button>
+                        </div>
+                        : ""
+                        }
+                    </td>
                 </tr>
             )
         })
@@ -88,12 +93,11 @@ class PrescriptionTable extends Component {
             <table className="table table-hover">
             <tbody>
               <tr className="table-primary">
-                <th scope="col"></th>
-                <th scope="col">Prescription ID</th>
+                <th scope="col" >Prescription ID</th>
                 <th scope="col" >Patient ID</th>
                 <th scope="col" >Drug ID</th>
                 <th scope="col" >Filled Dates</th>
-                <th scope="col">Written Date</th>
+                <th scope="col" >Written Date</th>
                 <th scope="col" >Quantity</th>
                 <th scope="col" >Days For</th>
                 <th scope="col" >Refills Left</th>
@@ -101,6 +105,8 @@ class PrescriptionTable extends Component {
                 <th scope="col" >Dispenser ID</th>
                 <th scope="col" >Cancelled</th>
                 <th scope="col" >Cancel Date</th>
+                <th scope="col" >Cancel</th>
+                <th scope="col" >Edit</th>
               </tr>
 
               {this.displayPrescriptions()}

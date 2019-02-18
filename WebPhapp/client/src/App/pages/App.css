@@ -30,3 +30,8 @@
     transform: rotate(360deg);
   }
 }
+
+/*Greys out disabled table data*/
+.disabled td {
+  color: #b9b9b9;
+}
