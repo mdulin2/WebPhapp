@@ -30,3 +30,7 @@
     transform: rotate(360deg);
   }
 }
+
+.disabled td {
+  color: #b9b9b9;
+}
