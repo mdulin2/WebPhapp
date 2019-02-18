@@ -67,22 +67,6 @@ class PrescriptionEdit extends Component {
 
   }
 
-/*
-Fields:
-- prescriptionID - Can't change
-- Patient ID     - Can't change
-- Drug ID        - Can't change
-- Filled Dates   - If filled, cannot change
-- Written Date   - Static
-- Quantity       - Changable?
-- Days for       - Changeable?
-- Refills left   - Changeable?
-- Prescriber ID  - Can't change
-- Dispenser ID   - Changable?
-- Cancelled      - If cancelled, cannot uncancel it or recancel it.
-- Cancel Date    -
-*/
-
   render() {
     return (
     /* Logic to render text conditionally */
