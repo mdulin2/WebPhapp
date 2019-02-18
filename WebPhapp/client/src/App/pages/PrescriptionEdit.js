@@ -209,8 +209,8 @@ Fields:
         </div>
         :
         <div className="col-8 center">
-          <div class="alert alert-warning" role="alert">
-            <span class="alert-inner--text"><strong>WARNING: </strong> Unable to edit. The prescription may have been fulfilled or cancelled.</span>
+          <div className="alert alert-warning" role="alert">
+            <span className="alert-inner--text"><strong>WARNING: </strong> Unable to edit. The prescription may have been fulfilled or cancelled.</span>
           </div>
         </div>
       }
