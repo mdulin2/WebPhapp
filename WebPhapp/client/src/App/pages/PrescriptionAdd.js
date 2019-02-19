@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-
+import { Link } from "react-router-dom";
 
 class PrescriptionAdd extends Component {
   // Initialize the state
@@ -74,91 +74,108 @@ class PrescriptionAdd extends Component {
 
     return (
       <div className="App">
-        <form>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Patient ID"
-                onChange={this.onKeyDownPatientID}/> 
+        <div className="col-xl-8 order-xl-1 center">
+        <div className="card bg-secondary shadow">
+          <div className="card-header bg-white border-0">
+              <div className="row align-items-center">
+                <div className="col-8 text-left">
+                  <h3 className="mb-0">Prescription Add</h3>
+                </div>
               </div>
+          </div>
+          <div className="card-body text-left">
+          <form>
+            <div className="pl-lg-4"> </div>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Patient ID"
+                  onChange={this.onKeyDownPatientID}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Drug ID"
+                  onChange={this.onKeyDownDrugID}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Quantity"
+                  onChange={this.onKeyDownQuantity}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Days For"
+                  onChange={this.onKeyDownDaysFor}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Refills Left"
+                  onChange={this.onKeyDownRefillsLeft}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Prescriber ID"
+                  onChange={this.onKeyDownPrescriberID}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Dispenser ID"
+                  onChange={this.onKeyDownDispenserID}/> 
+                </div>
+              </div>
+            </div> 
+          </form>
+          <Link to={"/"}>
+                <button 
+                  type="button" 
+                  className="btn btn-danger my-4"
+                  variant="raised">
+                  Cancel
+                </button>
+          </Link>
+          <nbsp> </nbsp>
+          <button 
+            type="button" 
+            class="btn btn-success my-4" 
+            onClick={this.onSendPrecription}>
+            Add Prescription
+          </button>
             </div>
           </div>
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Drug ID"
-                onChange={this.onKeyDownDrugID}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Quantity"
-                onChange={this.onKeyDownQuantity}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Days For"
-                onChange={this.onKeyDownDaysFor}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Refills Left"
-                onChange={this.onKeyDownRefillsLeft}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Prescriber ID"
-                onChange={this.onKeyDownPrescriberID}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Dispenser ID"
-                onChange={this.onKeyDownDispenserID}/> 
-              </div>
-            </div>
-          </div> 
-        </form>
-        <button 
-          type="button" 
-          class="btn btn-primary my-4" 
-          onClick={this.onSendPrecription}>
-          Add Prescription
-        </button>
+          </div>
       </div>
     );
   }
