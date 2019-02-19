@@ -30,6 +30,18 @@ function readJsonFileSync(filepath, encoding){
     return JSON.parse(file);
 }
 
+/*
+    given a prescription, replaces all date integers with strings.
+    Returns updated prescription.
+    Assumes that all fields are properly filled.
+*/
+function convertDatesToString(prescription){
+    prescription.writtenDate = new Date(prescription.writtenDate).toString();
+    prescription.fillDates = prescription.fillDates.filter(dateInt => dateInt > 0);
+    prescription.fillDates = prescription.fillDates.map(dateInt => new Date(dateInt).toString());
+    return prescription;
+}
+
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -129,56 +141,82 @@ Returns:
 */
 app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     var patientID = parseInt(req.params.patientID);
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    var handlePrescriptionsCallback = function(prescriptions) {
+        var msg = 'Sent ' + prescriptions.length.toString() +
+                    ' prescription(s) for patient ID ' + patientID.toString();
 
-    var toSend = [];
-    prescriptions.forEach(prescription => {
-        if (prescription.patientID === patientID) toSend.push(prescription);
-    });
-
-    // if no prescriptions for a patient ID, return early
-    var msg = 'Sent ' + toSend.length.toString() +
-                ' prescription(s) for patient ID ' + patientID.toString();
-    if (toSend.length === 0) {
-        console.log(msg);
-        res.json([]);
-        return;
-    }
-
-    // if no connection string (Travis testing), fill drugName with dummy info
-    if (!conn.MySQL) {
-        for (var i = 0; i < toSend.length; i++){
-            toSend[i].drugName = "drugName";
-        }
-        res.json(toSend);
-        return;
-    }
-
-    // Look up the drug names given the list of drugIDs in MySQL
-    var drugIDs = toSend.map((prescription) => {
-        return prescription.drugID;
-    })
-
-    mysql.getDrugNamesFromIDs(drugIDs, connection)
-    .then((answer) => {
-        for (var i = 0; i < toSend.length; i++){
-            var drug = answer.rows.filter((row) => {
-                return (row.ID === toSend[i].drugID);
-            });
-
-            // Could be undefined on return
-            if(drug.length !== 0)
-              toSend[i].drugName = drug[0].NAME;
+        // if no prescriptions for a patient ID, return early
+        if (prescriptions.length === 0) {
+            console.log(msg);
+            res.json([]);
+            return;
         }
 
-        console.log(msg);
-        res.json(toSend);
-    })
-    .catch((error) => {
-        console.log("/api/v1/prescriptions: error: ", error);
-        res.json({});
-    });
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            for (var i = 0; i < prescriptions.length; i++){
+                prescriptions[i].drugName = "drugName";
+            }
+            res.json(prescriptions);
+            return;
+        }
+
+        // Look up the drug names given the list of drugIDs in MySQL
+        var drugIDs = prescriptions.map((prescription) => {
+            return prescription.drugID;
+        })
+
+        mysql.getDrugNamesFromIDs(drugIDs, connection)
+        .then((answer) => {
+            for (var i = 0; i < prescriptions.length; i++){
+                var drug = answer.rows.filter((row) => {
+                    return (row.ID === prescriptions[i].drugID);
+                });
+
+                // Could be undefined on return
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+                
+            }
+
+            console.log(msg);
+            res.json(prescriptions);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions: error: ", error);
+            res.status(400).send({});
+        });
+    };
+
+    if(conn.Blockchain){
+        var field_patientID = 0;
+        block_helper.read_by_value(field_patientID, patientID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        }).catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching patientID.');
+        });
+    }
+    else { // search prescriptions from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.patientID === patientID) toSend.push(prescription);
+        });
+        handlePrescriptionsCallback(toSend);
+    }
 });
 
 /*
@@ -216,6 +254,9 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
             return;
         }
 
+        // Convert date integers to strings
+        prescription = convertDatesToString(prescription);
+
         // if no connection string (Travis testing), fill drugName with dummy info
         if (!conn.MySQL) {
             prescription.drugName = "drugName";
@@ -248,7 +289,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
             handlePrescriptionCallback(answer.prescription);
         }).catch((error) => {
             console.log('error: ', error);
-            res.status(400).send('Prescription not found.');
+            res.status(400).send('Error searching for prescription by prescriptionID.');
         });
     }
     else { // load prescription from dummy data

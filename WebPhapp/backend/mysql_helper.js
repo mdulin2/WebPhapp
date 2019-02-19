@@ -25,11 +25,12 @@ module.exports = {
         var q = `
         SELECT ID, NAME
         FROM seniordesign1.pharmacopeia
-        WHERE ID IN (?)
+        WHERE ID IN ( ? )
         `;
 
         return new Promise((resolve, reject) => {
-            connection.query(q,[drugIDs.toString()], (error, rows, fields) => {
+            var values = [drugIDs.map(id => id.toString())];
+            connection.query(q, values, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });

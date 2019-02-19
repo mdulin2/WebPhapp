@@ -129,7 +129,8 @@ async function read(index_value){
 }
 
 
-/*  This function takes a type and a value, and returns prescriptions
+/*  DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+    This function takes a type and a value, and returns prescriptions
     that have a type, of the first index and, a value of the second index.
     
 
