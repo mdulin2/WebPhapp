@@ -14,7 +14,8 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "mysql": "^2.16.0",
-    "mysql2": "^1.6.4"
+    "mysql2": "^1.6.4",
+    "web3": "^1.0.0-beta.46"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

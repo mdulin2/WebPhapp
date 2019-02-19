@@ -6,6 +6,8 @@ The Pharmachain web app!
 ## MySQL DB Connection  
 In the directory `Webphapp/Webphapp/backend/` is the file `connections.js`. This file holds the connection strings for the database. To have any database functionality, you need to insert proper credentials to this file. You can find the working `connections.js` file in the GDrive folder. If connection strings are not provided, the backend falls back on filling in dummy data. When you commit future changes, make sure not to push the connection strings. This should be a hard mistake to make because the file is listed in `.gitignore`.
 
+### Blockchain Connection  
+In the same `connections.js` file, there is a boolean value `Blockchain`. When false, the backend routes all use the dummy data that exists in `WebPhapp/backend/dummy_data`. When true, the backend routes connect to the local blockchain instance. Not all functions are connected to the blockchain yet, so when `Blockchain: true`, some functions still use the dummy data. See [Running the Blockchain](#running-the-blockchain) for details on how to interact with the blockchain properly. Better yet, ask Jeb.
 
 ## Unit Testing  
 Run all tests before changing any files, opening a PR, updating a PR, and reviewing a PR.  

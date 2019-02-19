@@ -67,8 +67,19 @@ async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity,
 
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.addPrescription(patientID, prescriberID, dispenserID, drugID, drugQuantity,
-                                                         fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate);
+    let transaction = await Patient.methods.addPrescription(
+        patientID,
+        prescriberID,
+        dispenserID,
+        drugID,
+        drugQuantity,
+        fulfillmentDates,
+        dateWritten,
+        daysValid,
+        refillsLeft,
+        isCancelled,
+        cancelDate
+    );
     
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
@@ -85,12 +96,12 @@ async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity,
 }
 
 
-/*  This function takes an index and returns a prescription from the drugChain.
+/*  DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+    This function takes an index and returns a prescription from the drugChain.
     User input: prescription index on the drugChain.
     Argument list: index
     Example usage: node read_prescrip_index.js 0 
 */
-
 async function read(index_value){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 

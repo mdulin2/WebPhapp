@@ -10,7 +10,10 @@
 
 var connections = {
     // MySQL DB connection on AWS
-    MySQL: false
+    MySQL: false,
+
+    // true if use blockchain, false if use dummy data (JSON)
+    Blockchain: false
 };
 
 module.exports = connections;
