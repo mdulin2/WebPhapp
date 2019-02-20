@@ -41,6 +41,24 @@ app.get('/api/v1/list', (req,res) => {
     console.log('Sent list of items');
 });
 
+// An api endpoint that cancels the prescription associated with a
+// given prescription ID.
+// example: http://localhost:5000/api/v1/prescriptions/cancel/2
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+    //TODO Check for auth to do this.
+    //TODO Check for valid prescriptionID
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
+    //TODO Cancel the prescription on the blockchain
+    return finish("TODO: build prescription cancel to blockchain", true);
+});
+
 /*
 An api endpoint that returns all of the prescriptions associated with a patient ID
 Examples:
@@ -158,8 +176,8 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
 
     // Ensures that a filled or cancelled prescription cannot be altered.
     if(prescription.cancelDate !== -1 || prescription.fillDates.length !== 0){
-      // Jacob? What to send here?
       res.send({})
+      return finish('Attempt at cancelling fixed prescription', false);
     }
 
 
@@ -189,7 +207,7 @@ Expects an object with all integer fields:
             ....
         }
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {    
+app.post('/api/v1/prescriptions/add',(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -388,7 +406,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     else { // load prescription from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-    
+
         var prescription = prescriptions.find( function(elem) {
             return elem.prescriptionID === prescriptionID;
         });
