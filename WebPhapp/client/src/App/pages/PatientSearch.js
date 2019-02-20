@@ -64,7 +64,7 @@ class PatientSearch extends Component {
 
     return (
       <div className="form-group">
-        <form role="form">
+        <form>
 
           <div className="form-group mb-3">
             <div className="input-group input-group-alternative">

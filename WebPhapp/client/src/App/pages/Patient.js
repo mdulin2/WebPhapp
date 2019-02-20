@@ -11,12 +11,12 @@ class Patient extends Component {
 
   // Fetch the prescription on first mount
   componentDidMount() {
-    this.getPrescription();
+    this.getPrescriptions();
   }
 
   // Retrieves the items in a prescription from the Express app
   // ex. api/v1/prescriptions/01
-  getPrescription = () => {
+  getPrescriptions = () => {
 
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
@@ -35,6 +35,7 @@ class Patient extends Component {
     return(
       <PrescriptionTable
         prescriptions = {this.state.prescriptions}
+        getPrescriptions = {this.getPrescriptions}
       />
     )
   }

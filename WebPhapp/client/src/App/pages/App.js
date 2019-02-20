@@ -6,6 +6,7 @@ import Home from "./Home";
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
 import PrescriptionAdd from "./PrescriptionAdd.js"
+import PrescriptionEdit from "./PrescriptionEdit.js"
 import Header from "../components/Header.js"
 
 class App extends Component {
@@ -18,6 +19,7 @@ class App extends Component {
           <Route path="/patient" component={Patient} />
           <Route path="/patientSearch" component={PatientSearch} />
           <Route path="/prescriptionAdd" component={PrescriptionAdd}/>
+          <Route path="/prescriptionEdit" component={PrescriptionEdit}/>
         </Switch>
       </div>
     );
