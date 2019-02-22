@@ -21,6 +21,46 @@ var valuesToPrescription = function(values, prescriptionID) {
     };
 };
 
+/*
+Estabishes the patient and account to work from.
+Can be customized for different users down the road.
+Returns:
+    {
+        patient (web3 contract),
+        account (web3 account),
+        web3 (general web3 object)
+    }
+*/
+var connectToChain = async function() {
+    // Connecting to the node 1. Will want to change to IPC connection eventually.
+    let web3 = new Web3(
+        new Web3.providers.HttpProvider("http://10.50.0.2:22000", net)
+    );
+
+    // Get account information
+    let account = await web3.eth.personal.getAccounts();
+    account = account[0];
+
+    // Sets up contract requirements.
+    let source = fs.readFileSync('../PharmaChain/build/contracts/Patient.json'); 
+    let contracts = JSON.parse(source);
+    let patient = new web3.eth.Contract(
+        contracts.abi,
+        null,
+        {data: contracts.bytecode}
+    );
+
+    patient.options.address = fs.readFileSync(
+        "../PharmaChain/patient_contract_address.txt"
+    ).toString('ascii');
+
+    return {
+        patient: patient,
+        account: account,
+        web3: web3
+    };
+};
+
 module.exports = {
 
     /*
@@ -31,32 +71,12 @@ module.exports = {
         { prescription }
     */
     read: async function(index_value) {
-        // Connecting to the node 1. Will want to change to IPC connection eventually. 
-        let web3 = new Web3(
-            new Web3.providers.HttpProvider("http://10.50.0.2:22000", net)
-        );
-
-        // Get account information
-        let account = await web3.eth.personal.getAccounts();
-        account = account[0];
-
-        // Sets up contract requirements.
-        let source = fs.readFileSync('../PharmaChain/build/contracts/Patient.json'); 
-        let contracts = JSON.parse(source);
-        let Patient = new web3.eth.Contract(
-            contracts.abi,
-            null,
-            {data: contracts.bytecode}
-        );
-
-        Patient.options.address = fs.readFileSync(
-            "../PharmaChain/patient_contract_address.txt"
-        ).toString('ascii');
+        var blockchain = await connectToChain();
 
         var error;
         let prescription = {};
         try {
-            let values = await Patient.methods.getPrescription(index_value).call({from: account});
+            let values = await blockchain.patient.methods.getPrescription(index_value).call({from: blockchain.account});
             prescription = valuesToPrescription(values, index_value);
         }
         catch(err) {
@@ -92,28 +112,7 @@ module.exports = {
             It will return all found prescriptions that match this criteria.
     */
     read_by_value: async function(field_i, value_i) {
-
-        let web3 = new Web3(
-            new Web3.providers.HttpProvider("http://10.50.0.2:22000", net)
-        );
-
-        
-        // get account information
-        let account = await web3.eth.personal.getAccounts();
-        account = account[0];
-
-        // Sets up contract requirements.
-        let source = fs.readFileSync('../PharmaChain/build/contracts/Patient.json'); 
-        let contracts = JSON.parse(source);
-        let Patient = new web3.eth.Contract(
-            contracts.abi,
-            null,
-            {data: contracts.bytecode}
-        );
-
-        Patient.options.address = fs.readFileSync(
-            "../PharmaChain/patient_contract_address.txt"
-        ).toString('ascii');
+        var blockchain = await connectToChain();
         
         var prescriptions = [];
         var error;
@@ -123,8 +122,8 @@ module.exports = {
                 throw new Error("'field_i' is an index and must be within 0-9.");
             }
 
-            for(i = 0; i < await Patient.methods.getDrugChainLength().call({from: account}); i++){
-                let values = await Patient.methods.getPrescription(i).call({from: account});
+            for(i = 0; i < await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account}); i++){
+                let values = await blockchain.patient.methods.getPrescription(i).call({from: blockchain.account});
                 if(values[field_i] == value_i) {
                     prescriptions.push(valuesToPrescription(values, i));
                 }
@@ -138,5 +137,47 @@ module.exports = {
             if(error) reject(error);
             resolve({prescriptions});
         });
+    },
+
+    /*
+    This function creates a new prescription on the blockchain
+    Args:
+        patientID, prescriberID, dispenserID, drugID,
+        quantity, fillDates, writtenDate, daysValid,
+        refills, isCancelled, cancelDate
+    Returns:
+        Transaction object
+    Example: 
+        write(0, 1, 2, 14, '300MG', 1542357074, 200, 8, false, 0)  
+    */
+    write: async function(patientID, prescriberID, dispenserID, drugID, quantity, fillDates, writtenDate, daysValid, refills, isCancelled, cancelDate) {
+        var blockchain = await connectToChain();
+
+        // Set up prescription data to be sent.
+        let transaction = await blockchain.patient.methods.addPrescription(
+            patientID,
+            prescriberID,
+            dispenserID,
+            drugID,
+            quantity,
+            fillDates,
+            writtenDate,
+            daysValid,
+            refills,
+            isCancelled,
+            cancelDate
+        );
+        
+        // Submitting prescription transaction.
+        let encoded_transaction = transaction.encodeABI();
+        let block = await blockchain.web3.eth.sendTransaction({
+            data: encoded_transaction,
+            from: blockchain.account,
+            to: blockchain.patient.options.address,
+            gas: 50000000
+        });
+        
+        // Return Transaction object containing transaction hash and other data
+        return block;
     }
 }

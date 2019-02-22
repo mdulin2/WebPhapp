@@ -199,25 +199,28 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
 
 /*
 About:
-Attempts to add a prescription for a user, while also doing validation.
-Status of 200 if successful, 400 otherwise.
-Expects an object with all integer fields:
-{
-    patientID,
-    drugID,
-    quantity,
-    daysValid,
-    refills,
-    prescriberID,
-    dispensorID
-}
+    Attempts to add a prescription for a user, while also doing validation.
+    Status of 200 if successful, 400 otherwise.
+    Expects an object with all integer fields:
+    {
+        patientID,
+        drugID,
+        quantity,
+        daysValid,
+        refills,
+        prescriberID,
+        dispensorID
+    }
+Examples: 
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
     To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
             ....
         }
+Returns:
+    true if prescription is added, false if not.
 */
 app.post('/api/v1/prescriptions/add',(req,res) => {
     const prescription = req.body;
@@ -257,7 +260,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
     // validate there are no extraneous fields
     if(Object.keys(prescription).length > fields.length){
-        return finish("Prescription input has too many fields.", false);
+        return finish('Prescription input has too many fields.', false);
     }
 
     // other validation here should include:
@@ -266,15 +269,35 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     // we are ignoring this for now and will come back to it.
 
     // Add derived fields to the prescription
-    prescription.fillDates = []; // array of integer dates filled by the dispenser.
+    prescription.fillDates = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     prescription.writtenDate = new Date().getTime(); // time is in milliseconds since 1970 epoch.
-    prescription.cancelDate = -1; // -1 means no date- not cancelled.
+    prescription.isCancelled = false;
+    prescription.cancelDate = 0; // 0 means no date- not cancelled.
 
-    // TODO: query blockchain to get current highest prescriptionID
-    prescription.prescriptionID = -1;
-
-    // Add the prescription to the blockchain and index this prescription in MySQL.
-    return finish("TODO: build prescription add to blockchain", true);
+    // TODO: index this prescription in MySQL.
+    if(conn.Blockchain) {
+        block_helper.write(
+            prescription.patientID,
+            prescription.prescriberID,
+            prescription.dispenserID,
+            prescription.drugID,
+            prescription.quantity,
+            prescription.fillDates,
+            prescription.writtenDate,
+            prescription.daysValid,
+            prescription.refills,
+            prescription.isCancelled,
+            prescription.cancelDate
+        ).then((_) => {
+            return finish('Added prescription to chain.', true);
+        }).catch((error) => {
+            // Error in adding prescription to blockchain
+            return finish('Error: ' + error.toString(), false);
+        });
+    }
+    else {
+        return finish('do nothing for add prescription with dummy data', true);
+    }
 });
 
 /*

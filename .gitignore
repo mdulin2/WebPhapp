@@ -91,4 +91,4 @@ coverage
 connections.js
 
 # Quorum maker directory
-./WebPhapp/quorum-maker
+WebPhapp/quorum-maker

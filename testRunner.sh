@@ -71,10 +71,14 @@ fi
 # Blockchain testing
 if $c_option; then
     echo "Running blockchain tests..."
+    cd ./WebPhapp
+
+    # Clone into a fresh copy of the network if it doesn't  already
+    if [ ! -d "./quorum-maker" ]; then
+        git clone https://github.com/Pharmachain/quorum-maker
+    fi
 
     # Turn on the Quorum Network
-    cd ./WebPhapp
-    git clone https://github.com/Pharmachain/quorum-maker
     cd ./quorum-maker/TestNetwork
     sudo docker-compose up -d
     sleep 1m
