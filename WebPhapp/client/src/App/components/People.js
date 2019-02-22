@@ -35,19 +35,26 @@ class People extends Component {
   render() {
     return (
       // Returns a table of patients styled according to the Argon style system
-      <table className="table table-hover">
-      <tbody>
-        <tr className="table-primary">
-          <th scope="col">ID</th>
-          <th scope="col" >First Name</th>
-          <th scope="col" >Last Name</th>
-          <th scope="col">Date Of Birth</th>
-        </tr>
-
-        {this.displayPeople()}
-
-      </tbody>
-      </table>
+      <div className="card shadow">
+        <div className="card-header border-0">
+          <h3 className="mb-0">Patients</h3>
+        </div>
+        <div className="table-responsive">
+          <table className="table align-items-center table-flush">
+            <thead className="thead-light">
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Date Of Birth</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.displayPeople()}
+            </tbody>
+          </table>
+        </div>
+      </div>
     );
   }
 }

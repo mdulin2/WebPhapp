@@ -63,65 +63,77 @@ class PatientSearch extends Component {
   render() {
 
     return (
-      <div className="form-group">
-        <form>
-
-          <div className="form-group mb-3">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+      <div className="col-xl-8 order-xl-1 center">
+        <div className="card bg-secondary shadow">
+          <div className="card-header bg-white border-0">
+            <div className="row align-items-center">
+              <div className="col-8 text-left">
+                <h3 className="mb-0">Patient Search</h3>
               </div>
-              <input
-                className="form-control"
-                placeholder="Patient ID"
-                type="text"
-                value={this.state.patientID}
-                onChange={this.onKeyDownPatientID}
-              />
             </div>
           </div>
-
+          <div className="card-body text-left">
           <div className="form-group">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+          <form role="form">
+            <div className="form-group mb-3">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  placeholder="Patient ID"
+                  type="text"
+                  value={this.state.patientID}
+                  onChange={this.onKeyDownPatientID}
+                />
               </div>
-              <input
-                className="form-control"
-                placeholder="First Name"
-                type="p"
-                value={this.state.firstName}
-                onChange={this.onKeyDownFirstName}
-              />
             </div>
-          </div>
-
-          <div className="form-group">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+            <hr class="my-4"></hr>
+            <div className="form-group">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  placeholder="First Name"
+                  type="p"
+                  value={this.state.firstName}
+                  onChange={this.onKeyDownFirstName}
+                />
               </div>
-              <input
-                className="form-control"
-                placeholder="Last Name"
-                type="p"
-                value={this.state.lastName}
-                onChange={this.onKeyDownLastName}
-              />
             </div>
+
+            <div className="form-group">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  placeholder="Last Name"
+                  type="p"
+                  value={this.state.lastName}
+                  onChange={this.onKeyDownLastName}
+                />
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button type="button" className="btn btn-icon btn-3 btn-primary"
+                onClick={this.onSearchPatients}>
+                <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+                <span class="btn-inner--text">Search</span>
+              </button>
+            </div>
+
+          </form>
+          <br></br>
+          <People patientList={this.state.people}/>
           </div>
-
-          <div className="text-center">
-            <button type="button" className="btn btn-primary my-4"
-              onClick={this.onSearchPatients}>
-              Search
-            </button>
           </div>
-
-        </form>
-
-        <People patientList={this.state.people}/>
-
+        </div>
       </div>
     );
   }
