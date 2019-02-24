@@ -89,6 +89,9 @@ if $c_option; then
     # Run the test contracts
     cd ../../PharmaChain
     sudo truffle version
+    sudo truffle migrate
     sudo truffle test
+    sudo node deploy.js
+    sudo node load_data.js
     cd ../../
 fi
