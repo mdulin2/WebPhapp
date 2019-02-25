@@ -3,6 +3,8 @@ const path = require('path');
 var bodyParser = require('body-parser');
 var fs = require("fs");
 var conn = require('./connections.js') // private file not under VC.
+var pbkdf2 = require('pbkdf2')
+const crypto = require('crypto');
 
 const app = express();
 app.use(bodyParser.json() );        // to support JSON-encoded bodies
@@ -211,7 +213,7 @@ About:
         prescriberID,
         dispensorID
     }
-Examples: 
+Examples:
     Directly in terminal:
         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
     To be used in Axois call:
@@ -360,7 +362,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
                 else {
                     prescriptions[i].drugName = "drugName";
                 }
-                
+
             }
 
             console.log(msg);
@@ -385,7 +387,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     else { // search prescriptions from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-    
+
         var toSend = [];
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
@@ -587,6 +589,109 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     console.log(msg);
     res.json(matchingPatient);
+});
+
+/////////////
+/// users //
+////////////
+
+/*
+About:
+    The api endpoint to create a user.
+    Expects a username, password and role.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/add' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacob","role":"patient"}'
+Returns:
+    Success or failure with message
+*/
+app.post('/api/v1/users/add', (req,res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+        userInfo.role
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        // How to return a fail here?
+        console.log("/api/v1/users/add: error: ", "error");
+        res.json({});
+        return;
+    }
+
+    //TODO Username validation and validate a valid role
+
+    // Salts: Making the random table attack near impossible.
+    var salt = crypto.randomBytes(64).toString('base64');
+
+    // Hash the password
+    var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+    // Create user and add salt.
+    mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, connection)
+    .then(result => {
+        const id = result.rows[0].insertId;
+        mysql.insertSalt(id, salt, connection)
+        .then( () => {
+            // How to return a success here?
+            res.json("Success");
+        });
+    })
+    .catch((error) => {
+        // How to return a fail here?
+        console.log("/api/v1/users/add: error: ", error);
+        res.json({});
+    });
+});
+
+app.post('/api/v1/users/login', (req, res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        // How to return a fail here?
+        console.log("/api/v1/users/add: error: ", error);
+        res.json({});
+        return;
+    }
+
+    // Validate the logged in user
+    mysql.getSaltByUsername(userInfo.username, userInfo.password, connection)
+    .then(salt => {
+
+        if(salt.rows.length === 0){
+            // What to do?
+            // no salt found
+            return;
+        }
+
+        // Salt the password with the user specific salt
+        salt = salt.rows[0].salt;
+        var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+        // See if the password matches
+        mysql.getUserValidation(userInfo.username, hashedPassword, connection)
+        .then(user => {
+            if(user.rows.length === 0){
+                // Jacob?
+                return;
+            }
+
+            // Login is complete!
+            // TODO Creation of JWT tokens here and sent to the user. Use this for the auth token
+            res.json("JWT token");
+        });
+
+    }).catch(error => {
+        console.log(error);
+    });
 });
 
 // Handles any requests that don't match the ones above
