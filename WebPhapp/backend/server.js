@@ -131,8 +131,8 @@ About:
         patientID,
         drugID,
         quantity,
-        daysValid,
-        refills,
+        daysFor,
+        refillsLeft,
         prescriberID,
         dispensorID
     }
@@ -164,14 +164,26 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
         prescription.patientID,
         prescription.drugID,
         prescription.quantity,
-        prescription.daysValid,
-        prescription.refills,
+        prescription.daysFor,
+        prescription.refillsLeft,
         prescription.prescriberID,
         prescription.dispenserID
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
         return finish("Required prescription field(s) are null or undefined.", false)
+    }
+
+    // cast int fields to int
+    try {
+        prescription.patientID = parseInt(prescription.patientID);
+        prescription.drugID = parseInt(prescription.drugID);
+        prescription.daysFor = parseInt(prescription.daysFor);
+        prescription.refillsLeft = parseInt(prescription.refillsLeft);
+        prescription.prescriberID = parseInt(prescription.prescriberID);
+        prescription.dispenserID = parseInt(prescription.dispenserID);
+    } catch(error) {
+        finish("Error casting fields to int: " + error.toString(), false);
     }
 
     // validate fields are of proper type
@@ -211,8 +223,8 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
             prescription.quantity,
             prescription.fillDates,
             prescription.writtenDate,
-            prescription.daysValid,
-            prescription.refills,
+            prescription.daysFor,
+            prescription.refillsLeft,
             prescription.isCancelled,
             prescription.cancelDate
         ).then((_) => {

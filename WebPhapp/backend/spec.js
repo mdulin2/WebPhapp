@@ -226,8 +226,8 @@ describe("loading express", function() {
       patientID: 0,
       drugID: 0,
       quantity:"0",
-      daysValid:0,
-      refills:0,
+      daysFor:0,
+      refillsLeft:0,
       prescriberID:0,
       dispenserID:0
     })
@@ -245,8 +245,8 @@ describe("loading express", function() {
       patientID: 0,
       drugID: 0,
       quantity:"0",
-      daysValid:0,
-      refills:0,
+      daysFor:0,
+      refillsLeft:0,
       prescriberID:0,
       dispenserID:0,
       extraField:0
@@ -265,8 +265,8 @@ describe("loading express", function() {
       patientID: "this should not be a string",
       drugID: 0,
       quantity:"0",
-      daysValid:0,
-      refills:0,
+      daysFor:0,
+      refillsLeft:0,
       prescriberID:0,
       dispenserID:0,
     })
@@ -283,8 +283,8 @@ describe("loading express", function() {
     .send({
       drugID: 0,
       quantity:"0",
-      daysValid:0,
-      refills:0,
+      daysFor:0,
+      refillsLeft:0,
       prescriberID:0,
       dispenserID:0,
     })
