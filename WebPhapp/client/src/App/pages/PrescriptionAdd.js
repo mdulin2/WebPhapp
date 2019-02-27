@@ -74,6 +74,19 @@ class PrescriptionAdd extends Component {
 
     return (
       <div className="App">
+
+        <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+            <div className="modal-dialog modal-" role="document">
+                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                    <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully added to Pharmachain.</span>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -170,13 +183,15 @@ class PrescriptionAdd extends Component {
           <button 
             type="button" 
             class="btn btn-success my-4" 
+            data-toggle="modal" 
+            data-target="#add-prescription-modal"
             onClick={this.onSendPrecription}>
             Add Prescription
           </button>
-            </div>
           </div>
           </div>
-      </div>
+        </div>
+    </div>
     );
   }
 }
