@@ -30,6 +30,11 @@
     transform: rotate(360deg);
   }
 }
+/*Allows cards to be displayed in order from left to right*/
+.masonry { 
+  display: flex;
+  flex-flow: row wrap;
+}
 
 /*Greys out disabled table data*/
 .disabled td {

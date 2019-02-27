@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import PrescriptionTable from "../components/PrescriptionTable";
+import Prescription from "../components/Prescription";
 import qs from 'qs';
 
 class Patient extends Component {
@@ -29,11 +29,11 @@ class Patient extends Component {
       .then(prescriptions => this.setState({ prescriptions }));
   };
 
-  // displayPrescriptions() displays the properties of a prescription using PrescriptionTable
+  // displayPrescriptions() displays the properties of a prescription using Prescription
   // @return: returns all prescriptions for a patient id
   displayPrescriptions = () => {
     return(
-      <PrescriptionTable
+      <Prescription
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
       />
