@@ -100,7 +100,7 @@ class Prescription extends Component {
         var daysFor = (prescription && prescription.daysFor) || "";
         var refillsLeft = (prescription && prescription.refillsLeft);
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
-        var cancelDate = prescription && (prescription.cancelDate === -1 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
+        var cancelDate = prescription && (prescription.cancelDate <= 0 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
         var fillDates = prescription && prescription.fillDates;  
 
         var fillDatesLength = prescription && prescription.fillDates.length;
@@ -229,7 +229,7 @@ class Prescription extends Component {
                                     
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">
-                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
+                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"

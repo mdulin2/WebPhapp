@@ -214,6 +214,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     prescription.cancelDate = 0; // 0 means no date- not cancelled.
 
     // TODO: index this prescription in MySQL.
+    console.log('Adding prescription to chain for patientID ' + prescription.patientID.toString() + '...');
     if(conn.Blockchain) {
         block_helper.write(
             prescription.patientID,
