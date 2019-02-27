@@ -140,7 +140,7 @@ class PrescriptionEdit extends Component {
             <div className="row">
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Quantity: {this.state.quantity}</label>
+                  <label className="form-control-label">Quantity:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -151,7 +151,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Days For: {this.state.daysFor}</label>
+                  <label className="form-control-label">Days For:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -162,7 +162,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Refills Left: {this.state.refillsLeft}</label>
+                  <label className="form-control-label">Refills Left:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -173,11 +173,11 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Dispenser ID: {this.state.dispenserID}</label>
+                  <label className="form-control-label">Dispenser ID:</label>
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Enter a Dispenser ID"
+                  placeholder="Enter the dispenser's ID"
                   value = {this.state.dispenserID}
                   onChange={this.onKeyDownDispenserID}/>
                 </div>

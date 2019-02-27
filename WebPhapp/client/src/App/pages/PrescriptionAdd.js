@@ -102,70 +102,77 @@ class PrescriptionAdd extends Component {
             <div className="row">
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Patient ID:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Patient ID"
+                  placeholder="Enter the patient's ID"
                   onChange={this.onKeyDownPatientID}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Drug ID:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Drug ID"
+                  placeholder="Enter the drug's ID"
                   onChange={this.onKeyDownDrugID}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Quantity:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Quantity"
+                  placeholder="Enter the quantity"
                   onChange={this.onKeyDownQuantity}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Days For:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Days For"
+                  placeholder="Enter the number of days for"
                   onChange={this.onKeyDownDaysFor}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Refills Left:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Refills Left"
+                  placeholder="Enter the number of refills left"
                   onChange={this.onKeyDownRefillsLeft}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Prescriber ID:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Prescriber ID"
+                  placeholder="Enter the prescriber's ID"
                   onChange={this.onKeyDownPrescriberID}/> 
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Dispenser ID:</label>
                   <input 
                   type="p" 
                   className="form-control" 
-                  placeholder="Dispenser ID"
+                  placeholder="Enter the dispenser's ID"
                   onChange={this.onKeyDownDispenserID}/> 
                 </div>
               </div>
