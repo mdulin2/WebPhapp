@@ -38,7 +38,7 @@ module.exports = {
     },
 
     /*
-    Given a list of drugIDs, looks up drug names in the MySQL DB.
+    Insert a user into the DB
     Args:
         username: Username to insert
         password: The salted and hashed password
@@ -64,7 +64,7 @@ module.exports = {
 
 
     /*
-    Given a list of drugIDs, looks up drug names in the MySQL DB.
+    Insert the salt into the DB
     Args:
         userID: userID to insert
         salt: Salt value for the user
@@ -88,8 +88,14 @@ module.exports = {
     },
 
     /*
+    Get the value of a salt, given the username
+    Args:
+        username: the username of the user
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the salt of a given user.
     */
-    getSaltByUsername: function(username, password, connection){
+    getSaltByUsername: function(username, connection){
         var q = `
         SELECT salt
         FROM salts s, users u
@@ -105,10 +111,17 @@ module.exports = {
     },
 
     /*
+    Get the username and password
+    Args:
+        username: the username of the user
+        password: Password that has been salted and hashed
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the user with the username and password
     */
     getUserValidation: function(username, password, connection){
         var q = `
-        SELECT username
+        SELECT id, role
         FROM users
         WHERE username = ? AND password = ?
         `;
