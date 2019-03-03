@@ -1,34 +1,34 @@
 // https://github.com/auth0/node-jsonwebtoken
+/*
+Verify that a jwt is valid.
+Args:
+    token: A json web token in a base64 encoded format.
+Returns:
+    False is faulty in some way or the decoded jwt otherwise.
+*/
+function verifyToken(token){
+    // imports
+    var jwt = require('jsonwebtoken');
+    var fs = require('fs');
+    var publicKey = fs.readFileSync('public.pem');  // get public key
 
-module.exports = {
-    /*
-    Verify that a jwt is valid.
-    Args:
-        token: A json web token in a base64 encoded format.
-    Returns:
-        False is faulty in some way or the decoded jwt otherwise.
-    */
-    verifyToken : function(token){
-        // imports
-        var jwt = require('jsonwebtoken');
-        var fs = require('fs');
-        var publicKey = fs.readFileSync('public.pem');  // get public key
-
-        return jwt.verify(token, publicKey, function(error,decoded) {
-            if(error && error.name === 'TokenExpiredError'){
-                console.log('Token expired...');
-                return false
-            }
-            else if(error && error.name === 'JsonWebTokenError'){
-                console.log('Invalid Web Token...' + error.message);
-                return false
-            }
-            else if(error == null){
-                return decoded;
-            }
+    return jwt.verify(token, publicKey, function(error,decoded) {
+        if(error && error.name === 'TokenExpiredError'){
+            console.log('Token expired...');
+            return false
+        }
+        else if(error && error.name === 'JsonWebTokenError'){
+            console.log('Invalid Web Token...' + error.message);
+            return false
+        }
+        else if(error == null){
             return decoded;
-        });
-    },
+        }
+        return decoded;
+    });
+}
+module.exports = {
+
 
     /*
     Create a new jwt token.
@@ -80,7 +80,7 @@ module.exports = {
             var jwt_token = req.headers.cookie;
             var jwt_token = jwt_token.split("=")[1];     //tentative...need to wait for actual web response...
 
-            const token = module.exports.verifyToken(jwt_token);
+            const token = verifyToken(jwt_token);
             // All verified data passed this if statement.
             if(token === false){
                 res.status(400).send(false);

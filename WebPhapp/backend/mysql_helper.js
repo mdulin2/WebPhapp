@@ -50,7 +50,8 @@ module.exports = {
     insertUser: function(username, password, role, connection) {
         var q = `
         INSERT INTO users (role, username, password)
-        VALUES (?,?,?); SELECT LAST_INSERT_ID();
+        VALUES (?,?,?);
+        SELECT LAST_INSERT_ID();
         `;
 
         return new Promise((resolve, reject) => {
@@ -99,7 +100,8 @@ module.exports = {
         var q = `
         SELECT salt
         FROM salts s, users u
-        WHERE s.id = u.id AND u.username = ? LIMIT 1;
+        WHERE s.id = u.id AND u.username = ?
+        LIMIT 1;
         `;
         return new Promise((resolve, reject) => {
             var values = [username];
