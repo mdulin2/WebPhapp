@@ -84,6 +84,10 @@ sudo truffle test
 ```
 sudo node deploy.js
 ```
+- Deploy dummy data to blockchain, if the blockchain is empty.
+```
+sudo node load_data.js
+```
 
 - Write prescription to blockchain example:
 ```

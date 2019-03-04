@@ -1,0 +1,40 @@
+{
+    "dispensers": [
+        {
+            "dispenserID": 0,
+            "name": "Walgreens",
+            "phone": 15553336464,
+            "location": "8840 E Dragontail Rd"
+        },
+        {
+            "dispenserID": 1,
+            "name": "Costco",
+            "phone": 15551106464,
+            "location": "8705 N Colchuck Ln"
+        },
+        {
+            "dispenserID": 2,
+            "name": "Safeway",
+            "phone": 15559376464,
+            "location": "8453 E Argonaut Dr"
+        },
+        {
+            "dispenserID": 3,
+            "name": "Yokes",
+            "phone": 15552126464,
+            "location": "8364 McClellan Pl"
+        },
+        {
+            "dispenserID": 4,
+            "name": "Rite Aid",
+            "phone": 15553456464,
+            "location": "9415 Stuart Rd"
+        },
+        {
+            "dispenserID": 5,
+            "name": "Walgreens",
+            "phone": 15555676464,
+            "location": "8605 Sherpa Rd"
+        }
+    ]
+}

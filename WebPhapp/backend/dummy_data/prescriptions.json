@@ -11,7 +11,7 @@
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     },
     {
       "prescriptionID": 2,
@@ -24,7 +24,7 @@
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     },
     {
       "prescriptionID": 3,
@@ -37,7 +37,7 @@
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     },
     {
       "prescriptionID": 4,
@@ -50,7 +50,7 @@
       "refillsLeft": 0,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     },
     {
       "prescriptionID": 5,
@@ -63,7 +63,7 @@
       "refillsLeft": 1,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     },
     {
       "prescriptionID": 6,
@@ -89,7 +89,7 @@
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": -1
+      "cancelDate": 0
     }
   ]
 }

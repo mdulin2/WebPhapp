@@ -71,8 +71,20 @@ class PrescriptionEdit extends Component {
     return (
     /* Logic to render text conditionally */
       <div className="App">
+        <div className="modal fade" id="edit-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+          <div className="modal-dialog modal-" role="document">
+              <div className="alert alert-success alert-dismissible fade show" role="alert">
+                  <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                  <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully edited.</span>
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+          </div>
+        </div>
+
       { this.state.cancelDate === "" ? "Loading..." :
-        this.state.cancelDate === -1 && this.state.fillDates.length === 0 ?
+        this.state.cancelDate <= 0 && this.state.fillDates.length === 0 ?
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -128,7 +140,7 @@ class PrescriptionEdit extends Component {
             <div className="row">
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Quantity</label>
+                  <label className="form-control-label">Quantity:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -139,7 +151,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Days For</label>
+                  <label className="form-control-label">Days For:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -150,7 +162,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Refills Left</label>
+                  <label className="form-control-label">Refills Left:</label>
                   <input
                   type="p"
                   className="form-control"
@@ -161,11 +173,11 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Dispenser ID</label>
+                  <label className="form-control-label">Dispenser ID:</label>
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Enter a Dispenser ID"
+                  placeholder="Enter the dispenser's ID"
                   value = {this.state.dispenserID}
                   onChange={this.onKeyDownDispenserID}/>
                 </div>
@@ -183,6 +195,8 @@ class PrescriptionEdit extends Component {
             <button
               type="button"
               className ="btn btn-success my-4"
+              data-toggle="modal" 
+              data-target="#edit-prescription-modal"
               onClick={this.onEditPrescription}>
               Confirm
             </button>
