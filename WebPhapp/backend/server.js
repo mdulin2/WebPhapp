@@ -1,10 +1,14 @@
 const express = require('express');
 const path = require('path');
-var bodyParser = require('body-parser');
-var fs = require("fs");
-var conn = require('./connections.js') // private file not under VC.
-
+const bodyParser = require('body-parser');
+const fs = require("fs");
+const crypto = require('crypto');
 const app = express();
+
+const conn = require('./connections.js') // private file not under VC.
+const pbkdf2 = require('pbkdf2');
+const auth = require('./auth_helper.js');
+const Role = require("./role.js");
 app.use(bodyParser.json() );        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
@@ -136,7 +140,7 @@ About:
         prescriberID,
         dispensorID
     }
-Examples: 
+Examples:
     Directly in terminal:
         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
     To be used in Axois call:
@@ -146,7 +150,7 @@ Examples:
         }
 Returns:
     true if prescription is added, false if not.
-Note on daysValid field:
+Note on daysFor field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
 app.post('/api/v1/prescriptions/add',(req,res) => {
@@ -324,7 +328,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     else { // search prescriptions from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-    
+
         var toSend = [];
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
@@ -508,8 +512,15 @@ Returns:
         "dob": "10-05-1996"
     }
 */
-app.get('/api/v1/patients/:patientID', (req,res) => {
+app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), function(req,res) {
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+    if(token.role === Role.Patient && patientID != token.sub){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
 
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
@@ -517,7 +528,7 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     var matchingPatient = all_patients.find(function(patient){
         return patient.patientID === patientID;
-    })
+    });
 
     // log the backend process to the terminal
     var msg = '/api/v1/patients/:patientID: ';
@@ -530,6 +541,127 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     console.log(msg);
     res.json(matchingPatient);
+});
+
+// ------------------------
+//        users
+// ------------------------
+
+/*
+About:
+    The api endpoint to create a user.
+    Expects a username, password and role.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/add' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacob","role":"Patient"}'
+Returns:
+    Success or failure with message
+*/
+app.post('/api/v1/users/add', (req,res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+        userInfo.role
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/add: error: Not all fields");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Salts: Making the random table attack near impossible.
+    var salt = crypto.randomBytes(64).toString('base64');
+
+    // Hash the password
+    var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+    // Create user and add salt.
+    mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, connection)
+    .then(result => {
+        const id = result.rows[0].insertId;
+        console.log(id);
+        mysql.insertSalt(id, salt, connection)
+        .then( () => {
+            res.status(200).send(true);
+        });
+    })
+    .catch((error) => {
+        console.log("/api/v1/users/add: error: ", error);
+        res.status(400).send(false);
+    });
+});
+
+/*
+About:
+    The api endpoint to login as a user.
+    Expects a username and password.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/login' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin","password":"jacobispink"}'
+Returns:
+    A failure message or a auth to authenticate to the next page.
+*/
+app.post('/api/v1/users/login', (req, res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/login: error: Missing Fields");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validate the logged in user
+    mysql.getSaltByUsername(userInfo.username, connection)
+    .then(salt => {
+
+        if(salt.rows.length === 0){
+            console.log("/api/v1/users/login: error: User salt not found.");
+            res.status(400).send(false);
+            return;
+        }
+
+        // Salt the password with the user specific salt
+        salt = salt.rows[0].salt;
+        var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+        // See if the password matches
+        mysql.getUserValidation(userInfo.username, hashedPassword, connection)
+        .then(user => {
+            if(user.rows.length === 0){
+                console.log('/api/v1/users/login: Failed attempt');
+                res.status(400).send(false);
+                return;
+            }
+
+            // Login is complete. Send back a auth for the user to advance on.
+            var token = auth.createToken(user.rows[0].id, user.rows[0].role);
+            res.json(token);
+        });
+
+    }).catch(error => {
+        console.log(error);
+    });
+});
+
+/*
+About:
+    On the frontend, each time a web request is made for a webpage or api the  token needs to be verified. This reauth will verify the token, then send the user a new token.
+Example: NOTE - The 'jwt' must be a valid jwt token for the user.
+    curl "http://localhost:5000/api/v1/users/reauth" --cookie 'jwt=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiUGF0aWVudCIsInN1YiI6IjEyIiwiaWF0IjoxNTUxMzMzNTYwLCJleHAiOjE1NTEzMzcxNjB9.dR-JZF1VBQU7jEU9nROa_Ky8X7U5w5_H3m2ZpT61_eakRriHMPAQOANLbIVuXfZFeXAaBD0VYM2h4Dmj54WW-L7yn5PJqnlEOJzS1ut4-B1NkfgIXJEdUIFjIedNpkJ9nfN7G7_kSjJ3jpA-pqV8CZHtgINUQggbxp_UrAJd7iUN3Fa58hrQJ3_40ge7seLgI15LLIFUOQV0JQR3VbSPUL5wfZI6XKEXAeAIhuz7YXPxodPZVAxk6a0h4jmfnaxWD777vdiaW_7djYUlIwVD3OWcOGV4EojcIYvUyM8c9MrsRij1LNHEMBr5BuElYcV2ZqgxKE3ek9k1gyu3pMKpOQ'
+Returns:
+    jwt token or error
+*/
+app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]),(req,res) => {
+    var token = auth.createToken(req.token.sub, req.token.role);
+    res.status(200).send(token);
 });
 
 // ------------------------

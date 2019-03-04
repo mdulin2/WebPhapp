@@ -170,7 +170,7 @@ describe("loading express", function() {
   it("test-route-patients-id", function(done) {
     // test for patientID that exists
     request(server)
-      .get("/api/v1/patients/02")
+      .get("/api/v1/patients/2")
       .expect(function(res) {
         if([res.body.first, res.body.last, res.body.dob, res.body.patientID].includes(undefined)){
           throw new Error('Found empty patient field.');
