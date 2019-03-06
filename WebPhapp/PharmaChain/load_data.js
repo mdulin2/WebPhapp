@@ -35,13 +35,21 @@ async function loadPrescriptions(){
 	for (var j = 0; j < obj.prescriptions.length; j++){
 	    p = obj.prescriptions[j];
             
-            //Temp variable to store fillDates
-            let fillDates = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            for (var i = 0; i < p.fillDates.length; i++){
-	        if(p.fillDates[i] > 0){
-	            fillDates[i] = p.fillDates[i]
-                }	
-	    }
+		//Temp variable to store fillDates
+		let fillDates = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		for (var i = 0; i < p.fillDates.length; i++){
+			if(p.fillDates[i] > 0){
+				fillDates[i] = p.fillDates[i]
+				}
+		}
+		
+		if(p.cancelDate < 0){
+			p.cancelDate = 0;
+			p.isCancelled = false;
+		}
+		else {
+			p.isCancelled = true;
+		}
 
 	    let transaction = await Patient.methods.addPrescription(
 		p.patientID,
@@ -49,11 +57,11 @@ async function loadPrescriptions(){
 		p.dispenserID,
 		p.drugID,
 		p.quantity,
-		fillDates, //p.fillDates,
+		fillDates,
 		p.writtenDate,
 		p.daysFor,
 		p.refillsLeft,
-		false, //fix once data format between block and front/backend is changed,
+		p.isCancelled,
 		p.cancelDate
 	    );
 	

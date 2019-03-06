@@ -121,3 +121,10 @@ cd WebPhapp/
 sudo rm -r quorum-maker
 git clone https://github.com/Pharmachain/quorum-maker
 ```
+
+- If you see the following backend error:
+```
+error: TypeError: values.5.map is not a function
+```
+make sure you are running your backend with npm run start
+not npm start.

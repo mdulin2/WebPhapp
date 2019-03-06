@@ -51,12 +51,17 @@ function convertDatesToString(prescription){
     return prescription;
 }
 
-// An api endpoint that cancels the prescription associated with a
-// given prescription ID.
-// example: http://localhost:5000/api/v1/prescriptions/cancel/2
+/*
+An api endpoint that cancels a prescription associated with a given prescriptionID.
+Example:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/cancel/0"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/cancel/0")
+*/
 app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
-    //TODO Check for auth to do this.
-    //TODO Check for valid prescriptionID
+    var prescriptionID = parseInt(req.params.prescriptionID);
+    var date = new Date().getTime();
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
@@ -65,61 +70,89 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         return;
     }
 
-    //TODO Cancel the prescription on the blockchain
-    return finish("TODO: build prescription cancel to blockchain", true);
+    //TODO Check for auth to do this.
+    //TODO Check for valid prescriptionID
+
+    if(conn.Blockchain) {
+        block_helper.cancel(prescriptionID, date)
+        .then((answer) => {
+            return finish(answer.toString(), true);
+        })
+        .catch((error) => {
+            return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
+        });
+    } else { // cancel prescription from dummy data
+        return finish('/api/v1/prescriptions/cancel: tmp: dummy data not changed', true);
+    }
 });
 
 /*
-Edits a prescription for a given prescription ID. The prescriptionID is used in order to get the rest of the data for the prescription. The rest of the data points are alterable values.
-
- Expects on object of shape:
-{
-  prescriptionID,
-  quantity,
-  daysFor,
-  refillsLeft,
-  dispenserID
-}
-
-  Directly in terminal:
-    >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 3,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"dispenserID":0}'
-
+Edits a prescription for a given prescriptionID. The prescriptionID indexes the prescription on the blockchain.
+Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int)
+Takes an object of shape:
+    {
+        prescriptionID,
+        quantity,
+        daysValid,
+        refillsLeft,
+        dispenserID
+    }
+Examples:
+    Directly in terminal:
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 0,"quantity":"99mg","daysValid":98,"refillsLeft":97,"dispenserID":96}'
     To be used in an axios call:
         .post("/api/v1/prescription/edit",{
             prescriptionID: 0,
             ....
         }
+Returns:
+    true (and status code 200) if prescription edited, false (and status code 400) otherwise.
 */
-
 app.post('/api/v1/prescriptions/edit',(req,res) => {
-
     //TODO auth check needed here with cookie that goes with request headers
     const changedPrescription = req.body;
-
-    // Should become actuall, non-static data
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-    var prescription = prescriptions.find( function(elem) {
-        return elem.prescriptionID === changedPrescription.prescriptionID;
-    });
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
         console.log(msg);
         res.status(success ? 200 : 400).json(success);
-        return;
     }
 
-    // Ensures that a filled or cancelled prescription cannot be altered.
-    if(prescription.cancelDate !== -1 || prescription.fillDates.length !== 0){
-      res.send({})
-      return finish('Attempt at cancelling fixed prescription', false);
+    // Ensure mandatory fields are all provided
+    fields = new Set([
+        changedPrescription.prescriptionID,
+        changedPrescription.quantity,
+        changedPrescription.daysValid,
+        changedPrescription.refillsLeft,
+        changedPrescription.dispenserID
+    ]);
+    if(fields.has(undefined) || fields.has(null)) {
+        return finish('/api/v1/prescriptions/edit: One of the mandatory prescription fields is null or undefined.', false);
     }
 
+    if(conn.Blockchain){
+        // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
+        block_helper.update(
+            changedPrescription.prescriptionID,
+            changedPrescription.dispenserID,
+            changedPrescription.quantity,
+            changedPrescription.daysValid,
+            changedPrescription.refillsLeft 
+        ).then((_) => {
+            return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
+        })
+        .catch((error) => {
+            return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
+        });
+    } else { // cancel prescription from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/dummy_data/prescriptions.json').prescriptions;
 
-    //TODO Go into blockchain to call changing functions...The data for this is in the changedPrescription data.
-    return finish("TODO: build prescription edit to blockchain", true);
+        var prescription = prescriptions.find( function(elem) {
+            return elem.prescriptionID === changedPrescription.prescriptionID;
+        });
+        return finish('edit tmp: dummy data not changed', true);
+    }
 });
 
 /*
@@ -171,7 +204,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
-        return finish("Required prescription field(s) are null or undefined.", false)
+        return finish('Required prescription field(s) are null or undefined.', false)
     }
 
     // cast int fields to int
@@ -188,8 +221,8 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
     // validate fields are of proper type
     for (var key in prescription){
-        if(key === "quantity"){
-            if(typeof prescription[key] !== "string"){
+        if(key === 'quantity'){
+            if(typeof prescription[key] !== 'string'){
                 return finish("Prescription field '" + key + "' should be of type String.", false);
             }
         } else if( !Number.isInteger(prescription[key]) ){
@@ -535,6 +568,53 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 // ------------------------
 //       dispensers
 // ------------------------
+
+/*
+About:
+    An api endpoint that redeems a prescription at a specific prescriptionID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/redeem/1"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/redeem/1")
+Returns:
+    true if redeemed, false otherwise
+*/
+app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
+    var prescriptionID = parseInt(req.params.prescriptionID);
+    var fillDate = new Date().getTime();
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+    }
+
+    if(conn.Blockchain) {
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+        block_helper.verifyChainIndex(prescriptionID)
+        .then((_) => {
+            block_helper.redeem(prescriptionID, fillDate)
+            .then((_) => {
+                return finish('/api/v1/dispensers/redeem: redeemed prescription with ID ' + prescriptionID.toString(), true);
+            })
+            .catch((error) => {
+                return finish('/api/v1/dispensers/redeem: error: ' + error.toString(), false);
+            });
+        })
+        .catch((error) => {
+            return finish('/api/v1/dispensers/redeem: error: ' + error.toString(), false);
+        });
+    } else { // redeem prescription from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/dummy_data/prescriptions.json').prescriptions;
+
+        var prescription = prescriptions.find( function(elem) {
+            return elem.prescriptionID === prescriptionID;
+        });
+        return finish('/api/v1/dispensers/redeem: tmp: dummy data not changed', true);
+    }
+});
 
 /*
 About:

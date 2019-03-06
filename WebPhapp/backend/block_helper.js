@@ -61,6 +61,13 @@ var connectToChain = async function() {
     };
 };
 
+// Returns the Integer number of prescriptions stored on the blockchain.
+var getChainLength = async function() {
+    var blockchain = await connectToChain();
+    let length = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+    return parseInt(length);
+};
+
 module.exports = {
 
     /*
@@ -70,14 +77,14 @@ module.exports = {
     Returns:
         { prescription }
     */
-    read: async function(index_value) {
+    read: async function(chainIndex) {
         var blockchain = await connectToChain();
 
         var error;
         let prescription = {};
         try {
-            let values = await blockchain.patient.methods.getPrescription(index_value).call({from: blockchain.account});
-            prescription = valuesToPrescription(values, index_value);
+            let values = await blockchain.patient.methods.getPrescription(chainIndex).call({from: blockchain.account});
+            prescription = valuesToPrescription(values, chainIndex);
         }
         catch(err) {
             error = err;
@@ -169,9 +176,9 @@ module.exports = {
         );
         
         // Submitting prescription transaction.
-        let encoded_transaction = transaction.encodeABI();
+        let encodedTransaction = transaction.encodeABI();
         let block = await blockchain.web3.eth.sendTransaction({
-            data: encoded_transaction,
+            data: encodedTransaction,
             from: blockchain.account,
             to: blockchain.patient.options.address,
             gas: 50000000
@@ -179,5 +186,172 @@ module.exports = {
         
         // Return Transaction object containing transaction hash and other data
         return block;
+    },
+
+    /*
+    This function redeems a prescription on the blockchain,
+	decrementing refills left, and adding a new date to fulfillmentDates
+    Args:
+        chainIndex (int)
+        date (int)
+    Returns:
+        Transaction object
+    Example:
+        redeem(0, 123456543)
+    */
+    redeem: async function(chainIndex, date) {
+        var blockchain = await connectToChain();
+        var error;
+        var block;
+
+        try {
+            // Ensures that a neither cancelled prescription nor one without refills left can be filled.
+            let values = await blockchain.patient.methods.getPrescription(chainIndex).call({from: blockchain.account});
+            let prescription = valuesToPrescription(values, chainIndex);
+            if(prescription.cancelDate > 0) {
+                throw new Error('cannot redeem a cancelled prescription.');
+            }
+            if(prescription.refillsLeft < 1) {
+                throw new Error('cannot redeem a prescription with no refills left.');
+            }
+
+            let transaction = await blockchain.patient.methods.redeemPrescription(chainIndex, date);
+            // Submitting prescription transaction.
+            let encodedTransaction = transaction.encodeABI();
+            block = await blockchain.web3.eth.sendTransaction({
+                data: encodedTransaction,
+                from: blockchain.account,
+                to: blockchain.patient.options.address,
+                gas: 50000000
+            });
+        }
+        catch(err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(block);
+        });
+    },
+
+    /*
+    This function cancels a prescription on the blockchain,
+        preventing it from being updated or altered
+    Args:
+        chainIndex (int)
+        date (int)
+    Returns:
+        Transaction object.
+    Example:
+        cancel(0, 123456543)
+    */
+    cancel: async function(chainIndex, date) {
+        var blockchain = await connectToChain();
+        var error;
+        var block;
+
+        try {
+            let transaction = await blockchain.patient.methods.cancelPrescription(chainIndex, date);
+            // Submitting prescription transaction.
+            let encodedTransaction = transaction.encodeABI();
+            block = await blockchain.web3.eth.sendTransaction({
+                data: encodedTransaction,
+                from: blockchain.account,
+                to: blockchain.patient.options.address,
+                gas: 50000000
+            });
+        }
+        catch(err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(block);
+        });
+    },
+
+    /*
+    This function updates a prescription on the blockchain,
+        altering its dispenserID, quantity, daysValid, and refillsLeft
+    Args:
+        chainIndex (int)
+        dispenserID (int)
+        quantity (string)
+        daysFor (int)
+        refillsLeft (int)
+    Returns:
+        Transaction Object.
+    Example:
+        update(0, 2, '300MG', 16, 1)
+    Note:
+        we have a daysFor vs daysValid problem here
+    */
+    update: async function(chainIndex, dispenserID, quantity, daysValid, refillsLeft) {
+        var blockchain = await connectToChain();
+        var error;
+        var block;
+        try {
+            // Ensures that a filled or cancelled prescription cannot be altered.
+            let values = await blockchain.patient.methods.getPrescription(chainIndex).call({from: blockchain.account});
+            let prescription = valuesToPrescription(values, chainIndex);
+            if(prescription.cancelDate > 0 || prescription.fillDates[0] > 0) {
+                throw new Error('cannot change a cancelled or already filled prescription.');
+            }
+
+            // Only call blockchain function if something is being updated
+            if(!(prescription.dispenserID === dispenserID) || !(prescription.quantity === quantity)
+                    || !(prescription.daysFor === daysValid) || !(prescription.refillsLeft === refillsLeft)) {
+
+                let transaction = await blockchain.patient.methods.updatePrescription(
+                    chainIndex,
+                    dispenserID,
+                    quantity,
+                    daysValid,
+                    refillsLeft
+                );
+    
+                let encodedTransaction = transaction.encodeABI();
+                block = await blockchain.web3.eth.sendTransaction({
+                    data: encodedTransaction,
+                    from: blockchain.account,
+                    to: blockchain.patient.options.address,
+                    gas: 50000000
+                });
+            }
+        }
+        catch(err) {
+            error = err;
+        }
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(block);
+        });
+    },
+
+    /*
+    Checks the length of the blockchain to determine if the given chainIndex is valid for an existing prescription.
+    Args:
+        chainIndex (int)
+    */
+    verifyChainIndex: async function(chainIndex) {
+        var blockchain = await connectToChain();
+        let chainLength;
+        let error;
+
+        try {
+            chainLength = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+            if(chainIndex >= parseInt(chainLength)) {
+                throw new Error('verifyChainIndex: given chainIndex is too high to be a valid index on the blockchain.');
+            }
+        } catch (err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(true);
+        });
     }
 }
