@@ -43,7 +43,7 @@ async function loadPrescriptions(){
 				}
 		}
 		
-		if(p.cancelDate < 0){
+		if(p.cancelDate <= 0){
 			p.cancelDate = 0;
 			p.isCancelled = false;
 		}
