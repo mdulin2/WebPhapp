@@ -3,15 +3,9 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import "../style/Alerts.css"
 
+
 class Prescription extends Component {
-    constructor(props){
-        super(props);
-        // Check for type of user with some API call.
-        const user = 'prescriber';
-        this.state={
-            user: user,
-        }
-    }
+    state = {};
 
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
@@ -69,14 +63,14 @@ class Prescription extends Component {
 
     // Displays the prescription card modal for "more info" of a prescription
     onClickViewPrescription = (event) => {
-        var prescriptionID = event.target.id || event.currentTarget.id;        
+        var prescriptionID = event.target.id || event.currentTarget.id;
         const modalPrescription = this.props.prescriptions[prescriptionID];
         this.setState({modalPrescription});
     }
 
     // Displays the table body for the fill dates of a prescription
     displayFillDates(fillDates){
-        if (fillDates == 0) {
+        if (fillDates === 0) {
             return (
                 <tr>
                     <td>{"-"}</td>
@@ -84,7 +78,7 @@ class Prescription extends Component {
                 </tr>
             )
         } else {
-            return fillDates.map((date, index) => 
+            return fillDates.map((date, index) =>
             <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{date}</td>
@@ -94,19 +88,19 @@ class Prescription extends Component {
     }
 
     render() {
-        var prescription = this.state.modalPrescription;        
+        var prescription = this.state.modalPrescription;
         var drugName = (prescription && prescription.drugName) || "";
         var quantity = (prescription && prescription.quantity) || "";
         var daysFor = (prescription && prescription.daysFor) || "";
         var refillsLeft = (prescription && prescription.refillsLeft);
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
         var cancelDate = prescription && (prescription.cancelDate <= 0 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
-        var fillDates = prescription && prescription.fillDates;  
+        var fillDates = prescription && prescription.fillDates;
 
         var fillDatesLength = prescription && prescription.fillDates.length;
         var formattedDates = [];
         for (var i = 0; i < fillDatesLength; i++){
-            formattedDates.push(fillDates[i].split(" ", 4).join(" ")); 
+            formattedDates.push(fillDates[i].split(" ", 4).join(" "));
         }
 
         return(
@@ -226,17 +220,17 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br></br>
-                                    
+
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">
-                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                        { prescription && (this.props.user === 'Prescriber' || this.props.user === 'Dispenser') && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
                                                 data-target="cancel-alert"
-                                                data-toggle="modal" 
+                                                data-toggle="modal"
                                                 data-target="#cancel-prescription-modal"
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
@@ -283,7 +277,7 @@ class Prescription extends Component {
                             </div>
                         </div>
                     </div>
-                    }                    
+                    }
                 </div>
             </div>
         );

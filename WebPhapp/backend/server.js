@@ -4,16 +4,17 @@ const bodyParser = require('body-parser');
 const fs = require("fs");
 const crypto = require('crypto');
 const app = express();
-
-const conn = require('./connections.js') // private file not under VC.
+var cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
+const conn = require('./connections.js') // private file not under VC.
+
 const auth = require('./auth_helper.js');
 const Role = require("./role.js");
 app.use(bodyParser.json() );        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
-
+app.use(cookieParser());
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -464,6 +465,7 @@ app.get('/api/v1/patients', auth.checkAuth([Role.Patient, Role.Prescriber, Role.
     var first = req.query.first;
     var last = req.query.last;
 
+    // Need to check for the role of a patient here...
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
@@ -547,6 +549,13 @@ app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescr
 //        users
 // ------------------------
 
+app.post('/api/v1/users/me', (req,res) => {
+    console.log('hello');
+    const userInfo = req.body;
+    var token = auth.createToken(1, userInfo.role);
+    res.json(token);
+})
+
 /*
 About:
     The api endpoint to create a user.
@@ -601,7 +610,7 @@ About:
     The api endpoint to login as a user.
     Expects a username and password.
 Examples:
-    curl 'http://localhost:5000/api/v1/users/login' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin","password":"jacobispink"}'
+    curl 'http://localhost:5000/api/v1/users/login' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacobispink"}'
 Returns:
     A failure message or a auth to authenticate to the next page.
 */
@@ -754,7 +763,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAu
                         + ' historical prescription(s) related to dispenserID ' + dispenserID.toString());
         res.status(200).send(prescriptions);
     }
-    
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
         console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
@@ -797,7 +806,7 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Ro
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take open prescriptions with dispenserID
         prescriptions = prescriptions.filter(
-            prescription => 
+            prescription =>
                 prescription.dispenserID === dispenserID
                 && prescription.refillsLeft > 0
                 && prescription.cancelDate < 1 // there is no cancel date if cancelDate is 0 or -1
@@ -879,7 +888,7 @@ app.get('/api/v1/dispensers/:name', auth.checkAuth([Role.Prescriber, Role.Dispen
         return elem.name.toLowerCase().includes(name.toLowerCase());
     });
 
-    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
+    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning '
                     + dispensers.length.toString() + ' dispensers.');
     res.status(200).send(dispensers);
 });

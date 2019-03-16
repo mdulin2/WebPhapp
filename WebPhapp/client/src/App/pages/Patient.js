@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import axios from "axios";
-import Prescription from "../components/Prescription";
+import PropTypes from "prop-types";
 import qs from 'qs';
+
+import Prescription from "../components/Prescription";
+
 
 class Patient extends Component {
   // Initialize the state
@@ -36,6 +39,7 @@ class Patient extends Component {
       <Prescription
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
+        user = {this.props.user}
       />
     )
   }

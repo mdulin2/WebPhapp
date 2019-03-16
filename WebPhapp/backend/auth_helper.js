@@ -74,11 +74,15 @@ module.exports = {
     */
     checkAuth : function(roles) {
         return (req,res,next) => {
+
+
             // console.log(module.exports.createToken('mdulin2','Patient'));
 
-            // TODO Error check to bad cookies
-            var jwt_token = req.headers.cookie;
-            var jwt_token = jwt_token.split("=")[1];     //tentative...need to wait for actual web response...
+            var jwt_token = req.cookies['auth_token'];
+            if(jwt_token == 'undefined'){
+                res.status(400).send(false);
+                return;
+            }
 
             const token = verifyToken(jwt_token);
             // All verified data passed this if statement.
