@@ -75,9 +75,6 @@ module.exports = {
     checkAuth : function(roles) {
         return (req,res,next) => {
 
-
-            // console.log(module.exports.createToken('mdulin2','Patient'));
-
             var jwt_token = req.cookies['auth_token'];
             if(jwt_token == 'undefined'){
                 res.status(400).send(false);

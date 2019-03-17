@@ -550,9 +550,9 @@ app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescr
 // ------------------------
 
 app.post('/api/v1/users/me', (req,res) => {
-    console.log('hello');
     const userInfo = req.body;
     var token = auth.createToken(1, userInfo.role);
+    console.log(token);
     res.json(token);
 })
 
@@ -654,6 +654,13 @@ app.post('/api/v1/users/login', (req, res) => {
 
             // Login is complete. Send back a auth for the user to advance on.
             var token = auth.createToken(user.rows[0].id, user.rows[0].role);
+
+            // Set the cookie AND send the token. 
+            const options = {
+                httpOnly: true,
+                sameSite: true
+            }
+            res.cookie('auth_token',token, options);
             res.json(token);
         });
 
@@ -672,6 +679,11 @@ Returns:
 */
 app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
     var token = auth.createToken(req.token.sub, req.token.role);
+    const options = {
+        httpOnly: true,
+        sameSite: true
+    }
+    res.cookie('auth_token',token, options);
     res.status(200).send(token);
 });
 
