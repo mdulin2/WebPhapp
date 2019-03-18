@@ -71,12 +71,18 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
     }
 
     //TODO Check for auth to do this.
-    //TODO Check for valid prescriptionID
 
     if(conn.Blockchain) {
-        block_helper.cancel(prescriptionID, date)
-        .then((answer) => {
-            return finish(answer.toString(), true);
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+         block_helper.verifyChainIndex(prescriptionID)
+         .then((_) => {
+            block_helper.cancel(prescriptionID, date)
+            .then((answer) => {
+                return finish(answer.toString(), true);
+            })
+            .catch((error) => {
+                return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
+            });
         })
         .catch((error) => {
             return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
@@ -131,15 +137,22 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
     }
 
     if(conn.Blockchain){
-        // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
-        block_helper.update(
-            changedPrescription.prescriptionID,
-            changedPrescription.dispenserID,
-            changedPrescription.quantity,
-            changedPrescription.daysValid,
-            changedPrescription.refillsLeft 
-        ).then((_) => {
-            return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
+         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+         block_helper.verifyChainIndex(changedPrescription.prescriptionID)
+         .then((_) => {
+            // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
+            block_helper.update(
+                changedPrescription.prescriptionID,
+                changedPrescription.dispenserID,
+                changedPrescription.quantity,
+                changedPrescription.daysValid,
+                changedPrescription.refillsLeft 
+            ).then((_) => {
+                return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
+            })
+            .catch((error) => {
+                return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
+            });
         })
         .catch((error) => {
             return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
@@ -388,8 +401,6 @@ Returns:
         cancelDate,
         drugName
     ]
-Warning:
-    no validation exists for blockchain index yet. See Issue #32 on GitHub.
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
@@ -431,13 +442,21 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     };
 
     if(conn.Blockchain){
-        block_helper.read(prescriptionID)
-        .then((answer) => {
-            handlePrescriptionCallback(answer.prescription);
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+        block_helper.verifyChainIndex(prescriptionID)
+        .then((_) => {
+            block_helper.read(prescriptionID)
+            .then((answer) => {
+                handlePrescriptionCallback(answer.prescription);
+            }).catch((error) => {
+                console.log('error: ', error);
+                res.status(400).send('Error searching for prescription by prescriptionID.');
+            });
         }).catch((error) => {
             console.log('error: ', error);
             res.status(400).send('Error searching for prescription by prescriptionID.');
         });
+
     }
     else { // load prescription from dummy data
         var prescriptions = readJsonFileSync(
