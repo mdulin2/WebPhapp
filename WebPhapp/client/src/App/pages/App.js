@@ -15,37 +15,39 @@ import Header from "../components/Header.js"
 // https://tylermcginnis.com/react-router-pass-props-to-components/ for the ability to pass props through the react router
 class App extends Component {
 
-  constructor(props){
+    constructor(props){
       super(props);
 
       this.state = {user: ''}
       this.authenticate_user();
 
-  }
+    }
 
   // Runs the auth requests and checks to serverside.
   authenticate_user = async () => {
 
       // Gets the old token to validate. Then, sends back a new one.
       const new_token = await axios.get(`/api/v1/users/reauth`);
-      // Validate the token
-      // TODO Warning: Should be a verify...
-      // Check for errors
-      const decoded_token = jwt.decode(new_token.data);
-      if(decoded_token === 'undefined' || decoded_token.role === 'undefined'){
-          this.setState({'user':''});
-          return false
-      }
 
-      const role = decoded_token.role;
+      // Gets the public key. Then, verifies the keys correctness.
+      fetch('public.pem')
+        .then(response => response.text())
+        .then(key => {
 
-      const cookies = new Cookies();
+              const decoded_token = jwt.verify(new_token.data, key);
+              if(decoded_token === 'undefined' || decoded_token.role === 'undefined'){
+                  this.setState({'user':''});
+                  return false
+              }
 
-      // TODO httpOnly and sameSite attribute
-      // this needs to be set on the serverside... did not know that!
-      cookies.set('auth_token', new_token.data, { path: '/'});
-      this.setState({'user':role});
-      return role;
+              const role = decoded_token.role;
+              this.setState({'user':role});
+              return;
+        })
+        .catch(error => {
+            // Likely an error with the verify function above.
+            return;
+        });
   }
 
 

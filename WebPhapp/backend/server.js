@@ -6,10 +6,12 @@ const crypto = require('crypto');
 const app = express();
 var cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
-const conn = require('./connections.js') // private file not under VC.
 
+const conn = require('./connections.js') // private file not under VC.
 const auth = require('./auth_helper.js');
 const Role = require("./role.js");
+const settings = require('./settings.js');
+
 app.use(bodyParser.json() );        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
@@ -96,7 +98,6 @@ Edits a prescription for a given prescription ID. The prescriptionID is used in 
 
 app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
 
-    //TODO auth check needed here with cookie that goes with request headers
     const changedPrescription = req.body;
 
     // Should become actuall, non-static data
@@ -260,6 +261,7 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+    // TODO: Restrict patients to only their prescriptions
     var patientID = parseInt(req.params.patientID);
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
@@ -364,7 +366,15 @@ Warning:
     no validation exists for blockchain index yet. See Issue #32 on GitHub.
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
+
+    // Need check for prescriptions
     var prescriptionID = parseInt(req.params.prescriptionID);
+    // Ensures that the patientID is the same as the tokens ID.
+    if(settings.env !== "test" || (token.role === Role.Patient && prescriptionID != token.sub)){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionCallback = function(prescription) {
         // '==' catches both null and undefined
         if (prescription == null) {
@@ -518,7 +528,9 @@ app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescr
 
     var patientID = parseInt(req.params.patientID);
     var token = req.token;
-    if(token.role === Role.Patient && patientID != token.sub){
+
+    // Ensures that the patientID is the same as the tokens ID.
+    if(settings.env !== "test" || (token.role === Role.Patient && patientID != token.sub)){
         console.log("PatientIDs do not match...")
         res.status(400).send(false);
         return;
@@ -655,7 +667,7 @@ app.post('/api/v1/users/login', (req, res) => {
             // Login is complete. Send back a auth for the user to advance on.
             var token = auth.createToken(user.rows[0].id, user.rows[0].role);
 
-            // Set the cookie AND send the token. 
+            // Set the cookie AND send the token.
             const options = {
                 httpOnly: true,
                 sameSite: true

@@ -13,7 +13,7 @@ var connections = {
     MySQL: false,
 
     // true if use blockchain, false if use dummy data (JSON)
-    Blockchain: false
+    Blockchain: false,
 };
 
 module.exports = connections;

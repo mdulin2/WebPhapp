@@ -1,4 +1,7 @@
 // https://github.com/auth0/node-jsonwebtoken
+
+const settings = require('./settings.js');
+
 /*
 Verify that a jwt is valid.
 Args:
@@ -74,6 +77,13 @@ module.exports = {
     */
     checkAuth : function(roles) {
         return (req,res,next) => {
+
+            if(settings.env === 'test'){
+                // Note: Not setting the request variable to have 'token'.
+                req.token = '';
+                next();
+                return;
+            }
 
             var jwt_token = req.cookies['auth_token'];
             if(jwt_token == 'undefined'){
