@@ -6,7 +6,8 @@ import qs from 'qs';
 class Patient extends Component {
   // Initialize the state
   state = {
-    prescriptions: []
+    prescriptions: [],
+    isFetching: true
   };
 
   // Fetch the prescription on first mount
@@ -26,7 +27,7 @@ class Patient extends Component {
       // String interpolation.
       .get(`/api/v1/prescriptions/${patientID}`)
       .then(results => results.data)
-      .then(prescriptions => this.setState({ prescriptions }));
+      .then(prescriptions => this.setState({ prescriptions, isFetching: false }));
   };
 
   // displayPrescriptions() displays the properties of a prescription using Prescription
@@ -42,19 +43,26 @@ class Patient extends Component {
 
   render() {
     const prescriptions = this.state.prescriptions;
+    const {isFetching} = this.state;
+    
     return (
+      /* Logic to render prescriptions or warning conditionally */
       <div className="App">
-        {/* Check to see if any prescriptions are found*/}
-        {prescriptions ? (
-          <div>
-            {/* Render the prescription */}
-            {this.displayPrescriptions()}
+      { isFetching ? ""
+        :          
+        /* Check to see if any prescriptions are found */
+        prescriptions.length ?
+        <div>
+          {/* Render the prescription */}
+          {this.displayPrescriptions()}
+        </div>
+        : 
+        <div className="col-8 center">
+          <div className="alert alert-warning" role="alert">
+          <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
           </div>
-        ) : (
-          <div>
-            <h2>No Prescriptions Found</h2>
-          </div>
-        )}
+        </div>
+      }
       </div>
     );
   }
