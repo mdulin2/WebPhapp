@@ -25,12 +25,28 @@ async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity,
     let Patient = new web3.eth.Contract(abi, null,{
         data: code,
     });
-
+	
+	var cancelled = false;
+	if(isCancelled == "true"){
+		cancelled  = true;
+	}
+	
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.addPrescription(patientID, prescriberID, dispenserID, drugID, drugQuantity,
-                                                         fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate);
-    
+    let transaction = await Patient.methods.addPrescription(
+        patientID,
+        prescriberID,
+        dispenserID,
+        drugID,
+        drugQuantity,
+        fulfillmentDates,
+        dateWritten,
+        daysValid,
+        refillsLeft,
+        cancelled,
+        cancelDate
+    );
+
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
     let block = await web3.eth.sendTransaction({
@@ -42,7 +58,6 @@ async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity,
     
     // Return Transaction object containing transaction hash and other data
     return block;
-
 }
 
 // Main: 
@@ -53,8 +68,7 @@ let prescriberID = args[3];
 let dispenserID = args[4];
 let drugID = args[5];
 let drugQuantity = args[6]; 
-// Must be a 16 element int array in order to work. 
-let fulfillmentDates = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+let fulfillmentDates = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // Must be a 16 element int array in order to work. 
 let dateWritten = args[7];  
 let daysValid = args[8];
 let refillsLeft = args[9];

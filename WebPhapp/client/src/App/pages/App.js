@@ -6,19 +6,22 @@ import axios from "axios";
 
 import "./App.css";
 import Home from "./Home";
+
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
 import PrescriptionAdd from "./PrescriptionAdd.js"
 import PrescriptionEdit from "./PrescriptionEdit.js"
 import Header from "../components/Header.js"
+import Login from "./Login.js"
 
-// https://tylermcginnis.com/react-router-pass-props-to-components/ for the ability to pass props through the react router
 class App extends Component {
+
 
     constructor(props){
       super(props);
 
-      this.state = {user: ''}
+      this.state = {user: '',
+			headerToggle: true}
       this.authenticate_user();
 
     }
@@ -57,22 +60,21 @@ class App extends Component {
     const App = () => (
 
       <div>
-        <Header/>
-        {user !== '' &&
+        {this.state.headerToggle && <Header/>}
         <Switch>
           <Route exact path="/" component={() => <Home user={user}/> } />
           <Route path="/patient" component={props => <Patient {...props} user={user} />} />
           <Route path="/patientSearch" component={props =>  <PatientSearch {...props}  user={user}/>} />
           <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} user={user}/>}/>
           <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} user={user}/>}/>
-        </Switch>
-        }
+	  <Route path="/login" component={Login}/>        
+</Switch>
       </div>
     );
     return (
       <BrowserRouter>
           <Switch>
-            <App />
+            <App/>
           </Switch>
       </BrowserRouter>
     );
