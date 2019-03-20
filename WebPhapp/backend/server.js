@@ -587,6 +587,7 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 // ------------------------
 //       dispensers
 // ------------------------
+const FIELD_DISPENSER_ID_INT = 2; // blockchain index of the dispenserID field
 
 /*
 About:
@@ -654,31 +655,84 @@ app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', (req, res) => {
             prescription => prescription.dispenserID === dispenserID
         );
 
+        var valid_return_msg = 'Sending all ' + prescriptions.length.toString()
+                        + ' prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/all: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/all: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/all: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
@@ -710,32 +764,84 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
                 (prescription.cancelDate > 0 || prescription.refillsLeft < 1) // there is no cancel date if cancelDate is 0 or -1
         );
 
+        var valid_return_msg = 'Sending ' + prescriptions.length.toString()
+                        + ' historical prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' historical prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/historical: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
     
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/historical: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/historical: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
@@ -768,32 +874,84 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
                 && prescription.cancelDate < 1 // there is no cancel date if cancelDate is 0 or -1
         );
 
+        var valid_return_msg = 'Sending ' + prescriptions.length.toString()
+                        + ' open prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' open prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/open: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
 
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/open/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/open: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/open: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
