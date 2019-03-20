@@ -17,7 +17,7 @@ class PatientSearch extends Component {
     if(this.props.user === 'Patient'){
         return;
     }
-    
+
     axios
       .get("/api/v1/patients?first=&last=")
       .then(results => results.data)
@@ -84,7 +84,7 @@ class PatientSearch extends Component {
 
     return (
       <div>
-      {this.props.user === 'Prescriber' || this.props.user === 'Dispenser' || this.props.user === 'Government' ?
+      {this.props.user === 'Prescriber' || this.props.user === 'Dispenser' || this.props.user === 'Government' || this.props.user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">

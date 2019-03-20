@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require("fs");
 const crypto = require('crypto');
 const app = express();
-var cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
 
 const conn = require('./connections.js') // private file not under VC.
@@ -12,10 +12,11 @@ const auth = require('./auth_helper.js');
 const Role = require("./role.js");
 const settings = require('./settings.js');
 
-app.use(bodyParser.json() );        // to support JSON-encoded bodies
+app.use(bodyParser.json());        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
+
 app.use(cookieParser());
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
@@ -164,7 +165,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysValid,
-                changedPrescription.refillsLeft 
+                changedPrescription.refillsLeft
             ).then((_) => {
                 return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
             })
@@ -321,8 +322,15 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
-    // TODO: Restrict patients to only their prescriptions
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+    console.log(token.sub, patientID);
+    if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
                     ' prescription(s) for patient ID ' + patientID.toString();
@@ -430,7 +438,9 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', auth.checkAuth([Role.Pat
     // Need check for prescriptions
     var prescriptionID = parseInt(req.params.prescriptionID);
     // Ensures that the patientID is the same as the tokens ID.
-    if(settings.env !== "test" || (token.role === Role.Patient && prescriptionID != token.sub)){
+    var token = req.token;
+
+    if((token.role === Role.Patient && prescriptionID != token.sub) && settings.env !== "test"){
         console.log("PatientIDs do not match...")
         res.status(400).send(false);
         return;
@@ -624,8 +634,10 @@ app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescr
     console.log(msg);
     res.json(matchingPatient);
 });
+
 app.post('/api/v1/users/me', (req,res) => {
     const userInfo = req.body;
+    console.log(userInfo);
     var token = auth.createToken(1, userInfo.role);
     console.log(token);
     res.json(token);
@@ -642,7 +654,7 @@ Returns:
 Authentication:
     Admin only (Role.Admin)
 */
-app.post('/api/v1/users/add', auth.checkAuth([]), (req,res) => {
+app.post('/api/v1/users/add', (req,res) => {
     const userInfo = req.body;
 
     // validate fields exist that should
@@ -735,6 +747,7 @@ app.post('/api/v1/users/login', (req, res) => {
                 httpOnly: true,
                 sameSite: true
             }
+
             res.cookie('auth_token',token, options);
             res.json(token);
         });
@@ -898,7 +911,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAu
                         + ' historical prescription(s) related to dispenserID ' + dispenserID.toString());
         res.status(200).send(prescriptions);
     }
-    
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
         console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
@@ -1023,7 +1036,7 @@ app.get('/api/v1/dispensers/:name', auth.checkAuth([Role.Prescriber, Role.Dispen
         return elem.name.toLowerCase().includes(name.toLowerCase());
     });
 
-    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
+    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning '
                     + dispensers.length.toString() + ' dispensers.');
     res.status(200).send(dispensers);
 });

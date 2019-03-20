@@ -21,10 +21,17 @@ class App extends Component {
       super(props);
 
       this.state = {user: '',
-			headerToggle: true}
+			        headerToggle: true}
+
       this.authenticate_user();
 
     }
+
+  componentDidMount(){
+      if(window.location.pathname === '/login'){
+          this.setState({headerToggle: false});
+      }
+  }
 
   // Runs the auth requests and checks to serverside.
   authenticate_user = async () => {
@@ -61,14 +68,21 @@ class App extends Component {
 
       <div>
         {this.state.headerToggle && <Header/>}
-        <Switch>
-          <Route exact path="/" component={() => <Home user={user}/> } />
-          <Route path="/patient" component={props => <Patient {...props} user={user} />} />
-          <Route path="/patientSearch" component={props =>  <PatientSearch {...props}  user={user}/>} />
-          <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} user={user}/>}/>
-          <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} user={user}/>}/>
-	  <Route path="/login" component={Login}/>        
-</Switch>
+
+        {/* authenticated routes */ }
+        {this.state.user !== '' ?
+            <Switch>
+              <Route exact path="/" component={() => <Home user={user}/> } />
+              <Route path="/patient" component={props => <Patient {...props} user={user} />} />
+              <Route path="/patientSearch" component={props =>  <PatientSearch {...props}  user={user}/>} />
+              <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} user={user}/>}/>
+              <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} user={user}/>}/>
+              <Route path="/login" component={Login}/>
+            </Switch>
+        : <Switch>
+            <Route path="/login" component={Login}/>
+          </Switch>
+        }
       </div>
     );
     return (

@@ -19,16 +19,16 @@ class Login extends Component {
     }
 
     // Authenticating user's credentials to login
-    onUserLogin = () => {
-      // TODO: send correct query to backend to validate user credentials
-      var loginQuery= ``;
+    onClickUserLogin = () => {
+      var loginQuery= `/api/v1/users/login`;
 
       /* Send a message back for an error or a success */
       axios
         .post(loginQuery,{
-          "userID": this.state.userID,
+          "username": this.state.userID,
           "password": this.state.password
         });
+      // if successful, then redirect.
     }
 
     render() {
@@ -111,9 +111,9 @@ class Login extends Component {
                       <div className="input-group-prepend">
                         <span className="input-group-text"><i className="ni ni-circle-08"></i></span>
                       </div>
-                      <input 
-                        className="form-control" 
-                        placeholder="User ID" 
+                      <input
+                        className="form-control"
+                        placeholder="User ID"
                         onChange={this.onKeyDownUserID}
                       />
                     </div>
@@ -123,8 +123,9 @@ class Login extends Component {
                       <div className="input-group-prepend">
                         <span className="input-group-text"><i className="ni ni-lock-circle-open"></i></span>
                       </div>
-                      <input 
+                      <input
                         className="form-control"
+                        type="password"
                         placeholder="Password"
                         onChange={this.onKeyDownPassword}
                       />
@@ -137,10 +138,10 @@ class Login extends Component {
                     </label>
                   </div>
                   <div className="text-center">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="btn btn-block btn-primary my-4"
-                      onClick={this.onUserLogin}>
+                      onClick={this.onClickUserLogin}>
                       Sign in
                   </button>
                   </div>
