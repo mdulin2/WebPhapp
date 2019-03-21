@@ -71,10 +71,10 @@ class PrescriptionAdd extends Component {
   }
 
   render() {
-    
+
     return (
       <div>
-      {this.props.user === 'Prescriber' ?
+      {this.props.role === 'Prescriber' ?
       <div className="App">
 
         <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">

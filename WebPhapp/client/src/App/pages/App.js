@@ -47,11 +47,11 @@ class App extends Component {
               const decoded_token = jwt.verify(new_token.data, key);
               if(decoded_token === 'undefined' || decoded_token.role === 'undefined'){
                   this.setState({'user':''});
-                  return false
+                  return false;
               }
 
-              const role = decoded_token.role;
-              this.setState({'user':role});
+              const user = decoded_token;
+              this.setState({'user':user});
               return;
         })
         .catch(error => {
@@ -72,11 +72,11 @@ class App extends Component {
         {/* authenticated routes */ }
         {this.state.user !== '' ?
             <Switch>
-              <Route exact path="/" component={() => <Home user={user}/> } />
-              <Route path="/patient" component={props => <Patient {...props} user={user} />} />
-              <Route path="/patientSearch" component={props =>  <PatientSearch {...props}  user={user}/>} />
-              <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} user={user}/>}/>
-              <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} user={user}/>}/>
+              <Route exact path="/" component={() => <Home id={user.sub} user={user.role}/> } />
+              <Route path="/patient" component={props => <Patient {...props} id={user.sub} role={user.role} />} />
+              <Route path="/patientSearch" component={props =>  <PatientSearch {...props} id={user.sub} role={user.role}/>} />
+              <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} id={user.sub} role={user.role}/>}/>
+              <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
               <Route path="/login" component={Login}/>
             </Switch>
         : <Switch>

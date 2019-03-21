@@ -14,7 +14,7 @@ class PatientSearch extends Component {
 
   componentDidMount() {
     // Loads all patients by default
-    if(this.props.user === 'Patient'){
+    if(this.props.role === 'Patient'){
         return;
     }
 
@@ -84,7 +84,7 @@ class PatientSearch extends Component {
 
     return (
       <div>
-      {this.props.user === 'Prescriber' || this.props.user === 'Dispenser' || this.props.user === 'Government' || this.props.user === 'Admin' ?
+      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' || this.props.role === 'Government' || this.props.role === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">

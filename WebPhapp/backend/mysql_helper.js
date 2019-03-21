@@ -47,15 +47,15 @@ module.exports = {
     Returns: Promise.
         Upon resolution, returns the insertion ID of the row.
     */
-    insertUser: function(username, password, role, connection) {
+    insertUser: function(username, password, role, role_id, connection) {
         var q = `
-        INSERT INTO users (role, username, password)
-        VALUES (?,?,?);
+        INSERT INTO users (role, role_id, username, password)
+        VALUES (?,?,?,?);
         SELECT LAST_INSERT_ID();
         `;
 
         return new Promise((resolve, reject) => {
-            var values = [role.toString(),username,password];
+            var values = [role.toString(), role_id, username, password];
             connection.query(q, values, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
@@ -112,6 +112,26 @@ module.exports = {
         });
     },
 
+    updateRoleCount: function(role, connection){
+        var q = `
+        UPDATE Role_Id_Count as R
+        SET R.id_number = (R.id_number + 1)
+        WHERE R.role = ?;
+
+        SELECT id_number
+        FROM Role_Id_Count
+        WHERE role = ?;
+        `;
+
+        return new Promise((resolve, reject) => {
+            var values = [role, role];
+            connection.query(q, values, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
+
     /*
     Get the username and password
     Args:
@@ -123,7 +143,7 @@ module.exports = {
     */
     getUserValidation: function(username, password, connection){
         var q = `
-        SELECT id, role
+        SELECT role_id, role
         FROM users
         WHERE username = ? AND password = ?
         `;

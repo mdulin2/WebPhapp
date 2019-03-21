@@ -67,7 +67,7 @@ Example:
     To be used in Axois call:
         .get("api/v1/prescriptions/cancel/0")
 */
-app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
 
@@ -77,8 +77,6 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         res.status(success ? 200 : 400).json(success);
         return;
     }
-
-    //TODO Check for auth to do this.
 
     if(conn.Blockchain) {
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
@@ -125,7 +123,6 @@ Returns:
 
 app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
 
-    //TODO auth check needed here with cookie that goes with request headers
     const changedPrescription = req.body;
 
     // Should become actuall, non-static data
@@ -214,7 +211,7 @@ Returns:
 Note on daysValid field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {
+app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -325,7 +322,6 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
 
     var patientID = parseInt(req.params.patientID);
     var token = req.token;
-    console.log(token.sub, patientID);
     if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
         console.log("PatientIDs do not match...")
         res.status(400).send(false);
@@ -549,7 +545,7 @@ Returns:
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
 */
-app.get('/api/v1/patients', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
+app.get('/api/v1/patients', auth.checkAuth([Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
     var first = req.query.first;
     var last = req.query.last;
 
@@ -670,23 +666,32 @@ app.post('/api/v1/users/add', (req,res) => {
         return;
     }
 
+    // Validates the role
+    const checkRole = Object.keys(Role).filter(role => userInfo.role === role);
+    if(checkRole.length === 0){
+        console.log("/api/v1/users/add: Invalid role");
+        res.status(400).send(false);
+        return;
+    }
+
     // Salts: Making the random table attack near impossible.
     var salt = crypto.randomBytes(64).toString('base64');
 
     // Hash the password
     var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
 
-    // Create user and add salt.
-    mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, connection)
-    .then(result => {
+    mysql.updateRoleCount(userInfo.role, connection).then(results => {
+        // Grabs the query, not the insertion.
+        const role_id = results.rows[1][0].id_number;
+        return mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, role_id, connection);
+    }).then(result => {
         const id = result.rows[0].insertId;
-        console.log(id);
-        mysql.insertSalt(id, salt, connection)
-        .then( () => {
-            res.status(200).send(true);
-        });
-    })
-    .catch((error) => {
+        return mysql.insertSalt(id, salt, connection);
+
+    }).then(() => {
+        console.log("User created of role", userInfo.role, );
+        res.status(200).send(true);
+    }).catch((error) => {
         console.log("/api/v1/users/add: error: ", error);
         res.status(400).send(false);
     });
@@ -721,7 +726,7 @@ app.post('/api/v1/users/login', (req, res) => {
     .then(salt => {
 
         if(salt.rows.length === 0){
-            console.log("/api/v1/users/login: error: User salt not found.");
+            console.log("/api/v1/users/login: error: User not found.");
             res.status(400).send(false);
             return;
         }
@@ -731,26 +736,24 @@ app.post('/api/v1/users/login', (req, res) => {
         var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
 
         // See if the password matches
-        mysql.getUserValidation(userInfo.username, hashedPassword, connection)
-        .then(user => {
-            if(user.rows.length === 0){
-                console.log('/api/v1/users/login: Failed attempt');
-                res.status(400).send(false);
-                return;
-            }
+        return mysql.getUserValidation(userInfo.username, hashedPassword, connection);
+    }).then(user => {
+        if(user.rows.length === 0){
+            console.log('/api/v1/users/login: Failed attempt');
+            res.status(400).send(false);
+            return;
+        }
 
-            // Login is complete. Send back a auth for the user to advance on.
-            var token = auth.createToken(user.rows[0].id, user.rows[0].role);
+        // Login is complete. Send back a auth for the user to advance on.
+        var token = auth.createToken(user.rows[0].role_id, user.rows[0].role);
 
-            // Set the cookie AND send the token.
-            const options = {
-                httpOnly: true,
-                sameSite: true
-            }
-
-            res.cookie('auth_token',token, options);
-            res.json(token);
-        });
+        // Set the cookie AND send the token.
+        const options = {
+            httpOnly: true,
+            sameSite: true
+        }
+        res.cookie('auth_token',token, options);
+        res.json(token);
 
     }).catch(error => {
         console.log(error);
@@ -791,7 +794,7 @@ Examples:
 Returns:
     true if redeemed, false otherwise
 */
-app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
+app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispensor]), (req, res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var fillDate = new Date().getTime();
 
@@ -840,6 +843,13 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // take only prescriptions with matching dispenserID
         prescriptions = prescriptions.filter(
@@ -894,6 +904,12 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take historical prescriptions with dispenserID
         prescriptions = prescriptions.filter(
@@ -951,6 +967,12 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take open prescriptions with dispenserID
         prescriptions = prescriptions.filter(

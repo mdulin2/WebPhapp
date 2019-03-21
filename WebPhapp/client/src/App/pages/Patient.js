@@ -39,7 +39,7 @@ class Patient extends Component {
       <Prescription
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
-        user = {this.props.user}
+        user = {this.props.role}
       />
     )
   }

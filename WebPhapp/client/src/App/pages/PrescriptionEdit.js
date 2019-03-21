@@ -7,8 +7,6 @@ class PrescriptionEdit extends Component {
 
   constructor(props){
     super(props);
-    //TODO: Access control pattern here to check for proper usertype.
-
     this.state = {cancelDate: ""}
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriptionNo = querystring.ID;
@@ -68,10 +66,9 @@ class PrescriptionEdit extends Component {
   }
 
   render() {
-     console.log(this.props.user);
     return (
     <div>
-      {this.props.user === 'Prescriber' || this.props.user === 'Dispenser' ?
+      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' ?
       <div className="App">
         <div className="modal fade" id="edit-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
           <div className="modal-dialog modal-" role="document">
