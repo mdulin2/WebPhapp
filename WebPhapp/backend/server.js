@@ -769,6 +769,11 @@ Returns:
     jwt token or error
 */
 app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+    if(settings.env === 'test'){
+        res.status(200).send(token);
+        return;
+    }
+
     var token = auth.createToken(req.token.sub, req.token.role);
     const options = {
         httpOnly: true,
@@ -958,6 +963,7 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
     if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
         console.log("Dispenser IDs do not match...")
         res.status(400).send(false);
@@ -1073,8 +1079,9 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
     if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
-        console.log("Dispenser IDs do not match...")
+        console.log("Dispenser IDs do not match...");
         res.status(400).send(false);
         return;
     }
