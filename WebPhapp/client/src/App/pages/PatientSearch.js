@@ -150,7 +150,7 @@ class PatientSearch extends Component {
               </button>
             </div>
           </form>
-          <br></br>
+          <br/>
           <People patientList={this.state.people}/>
           </div>
           </div>

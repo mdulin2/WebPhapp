@@ -107,7 +107,7 @@ sudo node read_prescription_type_value.js 0 0
 - Update prescription with new values:
 ```
 sudo node update_prescription.js 0 1 2 4 true 8
-``` 
+```
 **Troubleshooting Blockchain**
 - If you see the following code:
 
@@ -128,3 +128,12 @@ error: TypeError: values.5.map is not a function
 ```
 make sure you are running your backend with npm run start
 not npm start.
+
+**Default Users**
+There are several users that are created in the DB. Here are the credentials for testing:
+  Username-Password-role-role_id
+- jackson oz: Prescriber 1  
+- ozzie smith: Patient 1
+- wizard oz: Dispenser 1
+- jackie moon: Government 1
+- joe bob: Admin 1

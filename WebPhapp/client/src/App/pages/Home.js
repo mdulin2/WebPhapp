@@ -27,6 +27,16 @@ class Home extends Component {
             </button>
           </div>
         </Link>
+        <Link to={"./dispenserSearch"}>
+          <div className="text-center">
+            <button 
+              type="button" 
+              className="btn btn-primary my-4"
+              variant="raised">
+              Redeem Prescription
+            </button>
+          </div>
+        </Link>
       </div>
     );
   }

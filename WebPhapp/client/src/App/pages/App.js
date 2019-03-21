@@ -4,15 +4,19 @@ import Cookies from 'universal-cookie';
 import jwt from 'jsonwebtoken';
 import axios from "axios";
 
+import Header from "../components/Header.js"
 import "./App.css";
-import Home from "./Home";
 
+import Home from "./Home";
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
+import DispenserSearch from "./DispenserSearch"
 import PrescriptionAdd from "./PrescriptionAdd.js"
 import PrescriptionEdit from "./PrescriptionEdit.js"
-import Header from "../components/Header.js"
+import PrescriptionRedeem from "./PrescriptionRedeem";
 import Login from "./Login.js"
+import CancelAlert from "./CancelAlert.js"
+
 
 class App extends Component {
 
@@ -77,6 +81,9 @@ class App extends Component {
               <Route path="/patientSearch" component={props =>  <PatientSearch {...props} id={user.sub} role={user.role}/>} />
               <Route path="/prescriptionAdd" component={props =>  <PrescriptionAdd {...props} id={user.sub} role={user.role}/>}/>
               <Route path="/prescriptionEdit" component={props =>  <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
+              <Route path="/prescriptionRedeem" component={props =>  <PrescriptionRedeem {...props} id={user.sub} role={user.role}/>}/>
+              <Route path="/cancel" component={props =>  <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
+              <Route path="/dispenserSearch" component={props =>  <DispenserSearch {...props} id={user.sub} role={user.role}/>}/>
               <Route path="/login" component={Login}/>
             </Switch>
         : <Switch>
