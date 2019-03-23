@@ -687,9 +687,8 @@ app.post('/api/v1/users/add', (req,res) => {
     }).then(result => {
         const id = result.rows[0].insertId;
         return mysql.insertSalt(id, salt, connection);
-
     }).then(() => {
-        console.log("User created of role", userInfo.role, );
+        console.log("/api/v1/users/add: User created of role", userInfo.role, );
         res.status(200).send(true);
     }).catch((error) => {
         console.log("/api/v1/users/add: error: ", error);

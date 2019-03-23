@@ -112,6 +112,14 @@ module.exports = {
         });
     },
 
+    /*
+    Updates the count of the role index for the users
+    Args:
+        role: The type of user being addded to the system
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the Role id for the user. 
+    */
     updateRoleCount: function(role, connection){
         var q = `
         UPDATE Role_Id_Count as R

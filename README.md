@@ -132,8 +132,8 @@ not npm start.
 **Default Users**
 There are several users that are created in the DB. Here are the credentials for testing:
   Username-Password-role-role_id
-- jackson oz: Prescriber 1  
-- ozzie smith: Patient 1
-- wizard oz: Dispenser 1
-- jackie moon: Government 1
-- joe bob: Admin 1
+- jackson, oz, Prescriber, 1  
+- ozzie, smith, Patient, 1
+- wizard, oz, Dispenser 1
+- jackie, moon, Government, 1
+- joe, bob, Admin, 1
