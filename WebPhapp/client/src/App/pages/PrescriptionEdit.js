@@ -7,8 +7,6 @@ class PrescriptionEdit extends Component {
 
   constructor(props){
     super(props);
-    //TODO: Access control pattern here to check for proper usertype.
-
     this.state = {cancelDate: ""}
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriptionNo = querystring.ID;
@@ -69,9 +67,10 @@ class PrescriptionEdit extends Component {
 
   render() {
     return (
-    /* Logic to render text conditionally */
+    <div>
+      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' ?
       <div className="App">
-        <div className="modal fade" id="edit-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+        <div className="modal fade" id="edit-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
           <div className="modal-dialog modal-" role="document">
               <div className="alert alert-success alert-dismissible fade show" role="alert">
                   <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
@@ -184,8 +183,8 @@ class PrescriptionEdit extends Component {
               </div>
             </div>
             <Link to={"/patient?ID=" + this.state.patientID}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger my-4"
                   variant="raised">
                   Cancel
@@ -195,7 +194,7 @@ class PrescriptionEdit extends Component {
             <button
               type="button"
               className ="btn btn-success my-4"
-              data-toggle="modal" 
+              data-toggle="modal"
               data-target="#edit-prescription-modal"
               onClick={this.onEditPrescription}>
               Confirm
@@ -212,6 +211,10 @@ class PrescriptionEdit extends Component {
           </div>
         </div>
       }
+
+
+      </div>
+        : "Not authorized :(" }
       </div>
     );
   }

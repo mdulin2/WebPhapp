@@ -73,6 +73,8 @@ class PrescriptionAdd extends Component {
   render() {
 
     return (
+      <div>
+      {this.props.role === 'Prescriber' ?
       <div className="App">
 
         <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
@@ -103,94 +105,94 @@ class PrescriptionAdd extends Component {
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Patient ID:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the patient's ID"
-                  onChange={this.onKeyDownPatientID}/> 
+                  onChange={this.onKeyDownPatientID}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Drug ID:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the drug's ID"
-                  onChange={this.onKeyDownDrugID}/> 
+                  onChange={this.onKeyDownDrugID}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Quantity:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the quantity"
-                  onChange={this.onKeyDownQuantity}/> 
+                  onChange={this.onKeyDownQuantity}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Days For:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the number of days for"
-                  onChange={this.onKeyDownDaysFor}/> 
+                  onChange={this.onKeyDownDaysFor}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Refills Left:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the number of refills left"
-                  onChange={this.onKeyDownRefillsLeft}/> 
+                  onChange={this.onKeyDownRefillsLeft}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Prescriber ID:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the prescriber's ID"
-                  onChange={this.onKeyDownPrescriberID}/> 
+                  onChange={this.onKeyDownPrescriberID}/>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Dispenser ID:</label>
-                  <input 
-                  type="p" 
-                  className="form-control" 
+                  <input
+                  type="p"
+                  className="form-control"
                   placeholder="Enter the dispenser's ID"
-                  onChange={this.onKeyDownDispenserID}/> 
+                  onChange={this.onKeyDownDispenserID}/>
                 </div>
               </div>
-            </div> 
+            </div>
           </form>
           <Link to={"/"}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger my-4"
                   variant="raised">
                   Cancel
                 </button>
           </Link>
           <nbsp> </nbsp>
-          <button 
-            type="button" 
-            class="btn btn-success my-4" 
-            data-toggle="modal" 
+          <button
+            type="button"
+            class="btn btn-success my-4"
+            data-toggle="modal"
             data-target="#add-prescription-modal"
             onClick={this.onSendPrecription}>
             Add Prescription
@@ -198,6 +200,9 @@ class PrescriptionAdd extends Component {
           </div>
           </div>
         </div>
+
+      </div>
+        : "Not authorized :("}
     </div>
     );
   }

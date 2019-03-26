@@ -14,6 +14,10 @@ class PatientSearch extends Component {
 
   componentDidMount() {
     // Loads all patients by default
+    if(this.props.role === 'Patient'){
+        return;
+    }
+
     axios
       .get("/api/v1/patients?first=&last=")
       .then(results => results.data)
@@ -79,6 +83,8 @@ class PatientSearch extends Component {
   render() {
 
     return (
+      <div>
+      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' || this.props.role === 'Government' || this.props.role === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -144,11 +150,13 @@ class PatientSearch extends Component {
               </button>
             </div>
           </form>
-          <br></br>
+          <br/>
           <People patientList={this.state.people}/>
           </div>
           </div>
         </div>
+      </div>
+      : 'Not authorized :(' }
       </div>
     );
   }

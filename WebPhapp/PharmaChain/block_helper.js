@@ -221,7 +221,8 @@ async function update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate
 
 }
 
-//Returns the number of prescriptions stored on the blockchain.
+// DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+// Returns the number of prescriptions stored on the blockchain.
 async function getChainLength(){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 

@@ -1,7 +1,7 @@
 /*
  * Connection strings for remote database connection.
  * DO NOT PUSH THIS FILE TO GITHUB. BAD THINGS WILL HAPPEN TO YOU.
- * 
+ *
  *  Location:
  *      WebPhapp/WebPhapp/backend/connections.js
  *  Maintainer:
@@ -13,7 +13,7 @@ var connections = {
     MySQL: false,
 
     // true if use blockchain, false if use dummy data (JSON)
-    Blockchain: false
+    Blockchain: false,
 };
 
 module.exports = connections;
