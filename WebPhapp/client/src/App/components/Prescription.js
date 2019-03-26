@@ -248,7 +248,7 @@ class Prescription extends Component {
                                     {/* Buttons for modal given certain users... */}
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">                                        
-                                        { user === 'Prescriber' && prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                        { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
@@ -268,7 +268,7 @@ class Prescription extends Component {
                                             </button>
                                             </div>
                                             :
-                                            user === 'Dispenser' && prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                            user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"

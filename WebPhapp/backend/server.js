@@ -799,7 +799,7 @@ Examples:
 Returns:
     true if redeemed, false otherwise
 */
-app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispensor]), (req, res) => {
+app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispenser]), (req, res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var fillDate = new Date().getTime();
 

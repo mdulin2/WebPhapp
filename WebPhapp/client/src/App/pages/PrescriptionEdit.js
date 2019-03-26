@@ -84,7 +84,7 @@ class PrescriptionEdit extends Component {
         </div>
 
       { this.state.cancelDate === "" ? "" :
-        this.state.cancelDate <= 0 && this.state.fillDates.length === 0 ?
+        this.state.cancelDate <= 0 && this.state.refillsLeft >= 0 ?
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
