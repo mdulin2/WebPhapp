@@ -4,7 +4,6 @@ import qs from 'qs';
 import { Link } from "react-router-dom";
 
 class PrescriptionEdit extends Component {
-
   constructor(props){
     super(props);
     this.state = {cancelDate: ""}
@@ -66,9 +65,11 @@ class PrescriptionEdit extends Component {
   }
 
   render() {
+    // User role from log in
+    const user = this.props.role;
     return (
     <div>
-      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' ?
+      {user === 'Prescriber' || user === 'Dispenser' || user === 'Admin' ?
       <div className="App">
         <div className="modal fade" id="edit-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
           <div className="modal-dialog modal-" role="document">
@@ -82,7 +83,7 @@ class PrescriptionEdit extends Component {
           </div>
         </div>
 
-      { this.state.cancelDate === "" ? "Loading..." :
+      { this.state.cancelDate === "" ? "" :
         this.state.cancelDate <= 0 && this.state.fillDates.length === 0 ?
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
@@ -211,11 +212,10 @@ class PrescriptionEdit extends Component {
           </div>
         </div>
       }
-
-
       </div>
-        : "Not authorized :(" }
-      </div>
+      :
+      "Not authorized :(" }
+    </div>
     );
   }
 }

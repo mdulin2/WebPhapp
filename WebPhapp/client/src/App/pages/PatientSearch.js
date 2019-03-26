@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import axios from "axios";
 import People from '../components/People'
 
-
 class PatientSearch extends Component {
   // Initialize the state
   state = {
@@ -81,10 +80,11 @@ class PatientSearch extends Component {
   }
 
   render() {
-
+    // User role from log in
+    const user = this.props.role; 
     return (
       <div>
-      {this.props.role === 'Prescriber' || this.props.role === 'Dispenser' || this.props.role === 'Government' || this.props.role === 'Admin' ?
+      {user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -156,7 +156,8 @@ class PatientSearch extends Component {
           </div>
         </div>
       </div>
-      : 'Not authorized :(' }
+      : 
+      "Not authorized :(" }
       </div>
     );
   }

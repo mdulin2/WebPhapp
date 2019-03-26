@@ -71,10 +71,11 @@ class PrescriptionAdd extends Component {
   }
 
   render() {
-
+    // User role from log in
+    const user = this.props.role; 
     return (
       <div>
-      {this.props.role === 'Prescriber' ?
+      {user === 'Prescriber' || user === 'Admin' ?
       <div className="App">
 
         <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
@@ -200,9 +201,9 @@ class PrescriptionAdd extends Component {
           </div>
           </div>
         </div>
-
       </div>
-        : "Not authorized :("}
+      : 
+      "Not authorized :(" }
     </div>
     );
   }

@@ -13,8 +13,11 @@ class DispenserSearch extends Component {
     }
 
   render() {
-
+    // User role from log in
+    const user = this.props.role; 
     return (
+      <div>
+      {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -51,7 +54,7 @@ class DispenserSearch extends Component {
             </div>
             <Link to={"./prescriptionRedeem?ID=" + this.state.dispenserID}>
             <div className="text-center">
-              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
+              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-warning">
                 <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
                 <span className="btn-inner--text">Search</span>
               </button>
@@ -60,6 +63,9 @@ class DispenserSearch extends Component {
           </div>
           </div>
         </div>
+      </div>
+      :
+      "Not authorized :(" }
       </div>
     );
   }

@@ -128,6 +128,7 @@ class PrescriptionRedeem extends Component {
                   <div className="tab-pane fade show active" id="prescription-all" role="tabpanel" aria-labelledby="prescription-tab-all">
                     <Prescription
                       prescriptions = {this.state.prescriptions}
+                      role = {this.props.role}
                     />
                   </div>
               </div>
@@ -140,9 +141,13 @@ class PrescriptionRedeem extends Component {
   }
 
   render() {
+    // User role from log in
+    const user = this.props.role; 
     var prescriptions = this.state.prescriptions;
       return (
-        <div className="App">
+        <div>
+        {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+          <div>
           {/* Check to see if any prescriptions are found*/}
           {prescriptions ? (
             <div>
@@ -150,10 +155,14 @@ class PrescriptionRedeem extends Component {
               {this.displayPrescriptions()}
             </div>
           ) : (
-            <div>
-              <h2>No Prescriptions Found</h2>
-            </div>
+            <div className="col-8 center">
+              <div className="alert alert-warning" role="alert">
+              <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
+              </div>
+            </div> 
           )}
+          </div>
+        : "" }
         </div>
       );
   }

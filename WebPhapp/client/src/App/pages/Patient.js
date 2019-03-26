@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
-import PropTypes from "prop-types";
 import qs from 'qs';
-
 import Prescription from "../components/Prescription";
-
 
 class Patient extends Component {
   // Initialize the state
@@ -40,18 +37,22 @@ class Patient extends Component {
       <Prescription
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
-        user = {this.props.role}
+        role = {this.props.role}
       />
     )
   }
 
   render() {
+    // User role from log in
+    const user = this.props.role; 
     const prescriptions = this.state.prescriptions;
     const {isFetching} = this.state;
     
     return (
       /* Logic to render prescriptions or warning conditionally */
-      <div className="App">
+      <div>
+      {user === 'Patient' || user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+      <div>
       { isFetching ? ""
         :          
         /* Check to see if any prescriptions are found */
@@ -65,8 +66,10 @@ class Patient extends Component {
           <div className="alert alert-warning" role="alert">
           <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
           </div>
-        </div>
-      }
+        </div> }
+      </div>
+      :
+      "" }
       </div>
     );
   }

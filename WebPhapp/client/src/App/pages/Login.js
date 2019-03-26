@@ -5,17 +5,18 @@ class Login extends Component {
     // Initialize the state
     state = {
         userID: "",
-        password: ""
+        password: "",
+        isError: false
     };
 
     // Updating value in userID state
     onKeyDownUserID = event => {
-        this.setState({userID: event.target.value});
+        this.setState({userID: event.target.value, isError: false});
     }
 
     // Updating value in password state
     onKeyDownPassword = event => {
-        this.setState({password: event.target.value});
+        this.setState({password: event.target.value, isError: false});
     }
 
     // Authenticating user's credentials to login
@@ -27,14 +28,19 @@ class Login extends Component {
         .post(loginQuery,{
           "username": this.state.userID,
           "password": this.state.password
-        });
+          }).then(response => {
+            window.location.href= "./"
+          }).catch(error => {
+            console.log("Error: Authentication"); 
+            this.setState({isError: true});
+          });
       // if successful, then redirect.
+      
     }
 
     render() {
         return(
           <div className="App">
-
           <div className="main-content">
 
           {/* Navbar */}
@@ -71,7 +77,7 @@ class Login extends Component {
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link nav-link-icon" href="./register">
+                    <a className="nav-link nav-link-icon" href="./login">
                       <i className="fas fa-user-plus"></i>
                       <span className="nav-link-inner--text">Register</span>
                     </a>
@@ -89,7 +95,7 @@ class Login extends Component {
             <div className="row justify-content-center">
               <div className="col-lg-5 col-md-6">
                 <h1 className="text-white">Welcome to Pharmachain!</h1>
-                <p className="text-lead text-light">Pharmachain is a cross-company data management web application that stores data as a history of anonymized transactions on a blockchain.</p>
+                <p className="text-lead text-light">Pharmachain is a cross-company data management web application that stores prescription data as a history of anonymized transactions on a blockchain.</p>
               </div>
             </div>
           </div>
@@ -131,19 +137,28 @@ class Login extends Component {
                       />
                     </div>
                   </div>
-                  <div className="custom-control custom-control-alternative custom-checkbox">
+                  {/* TODO: Remember Me */}
+                  {/* <div className="custom-control custom-control-alternative custom-checkbox">
                     <input className="custom-control-input" id="remember-me-check" type="checkbox"/>
                     <label className="custom-control-label" for="remember-me-check">
                       <span className="text-muted">Remember me</span>
                     </label>
+                  </div> */}
+                  {this.state.isError ? 
+                  <div className="alert alert-danger alert-dismissible text-center px-3 py-2" role="alert">
+                    <span><small><i className="fas fa-exclamation-circle">&nbsp;</i></small></span>
+                    <span><small><strong> ERROR: </strong>Invalid login credentials. Please try again.</small></span>
                   </div>
+                  :
+                  <br/>
+                  }
                   <div className="text-center">
                     <button
                       type="button"
                       className="btn btn-block btn-primary my-4"
                       onClick={this.onClickUserLogin}>
-                      Sign in
-                  </button>
+                      Sign In
+                    </button>
                   </div>
                 </form>
               </div>

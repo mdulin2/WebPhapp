@@ -716,7 +716,7 @@ app.post('/api/v1/users/login', (req, res) => {
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
         console.log("/api/v1/users/login: error: Missing Fields");
-        res.status(400).send(false);
+        res.status(403).send(false);
         return;
     }
 
@@ -726,7 +726,7 @@ app.post('/api/v1/users/login', (req, res) => {
 
         if(salt.rows.length === 0){
             console.log("/api/v1/users/login: error: User not found.");
-            res.status(400).send(false);
+            res.status(403).send(false);
             return;
         }
 
@@ -739,7 +739,7 @@ app.post('/api/v1/users/login', (req, res) => {
     }).then(user => {
         if(user.rows.length === 0){
             console.log('/api/v1/users/login: Failed attempt');
-            res.status(400).send(false);
+            res.status(403).send(false);
             return;
         }
 
@@ -769,7 +769,7 @@ Returns:
 */
 app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
     if(settings.env === 'test'){
-        res.status(200).send(token);
+        res.status(200);
         return;
     }
 

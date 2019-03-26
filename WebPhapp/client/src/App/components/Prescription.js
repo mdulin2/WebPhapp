@@ -3,14 +3,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 
 class Prescription extends Component {
-    constructor(props){
-        super(props);
-        // Check for type of user with some API call.
-        const user = 'prescriber';
-        this.state={
-            user: user,
-        }
-    }
+    state = {};
 
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
@@ -107,6 +100,10 @@ class Prescription extends Component {
     }
 
     render() {
+        // User role from log in
+        const user = this.props.role; 
+
+        // Attributes of a prescription
         var prescription = this.state.modalPrescription;
         var drugName = (prescription && prescription.drugName) || "";
         var quantity = (prescription && prescription.quantity) || "";
@@ -121,7 +118,7 @@ class Prescription extends Component {
         for (var i = 0; i < fillDatesLength; i++){
             formattedDates.push(fillDates[i].split(" ", 4).join(" "));
         }
-
+    
         return(
             <div className="container">
                 <div className="masonry align-items-left">
@@ -248,18 +245,35 @@ class Prescription extends Component {
                                     </div>
                                     <br/>
 
-                                    {/* Buttons for modal given certain conditions... */}
+                                    {/* Buttons for modal given certain users... */}
                                     <div className="row justify-content-center form-inline">
-                                        <div className="form-group justify-content-bottom">
-                                        { prescription && (this.props.user === 'Prescriber' || this.props.user === 'Dispenser') && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                        <div className="form-group justify-content-bottom">                                        
+                                        { user === 'Prescriber' && prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
-                                                data-target="cancel-alert"
-                                                data-toggle="modal"
-                                                data-target="#cancel-prescription-modal"
+                                                onClick = {this.onCancelClick}>
+                                                <span className="btn-inner--text">Cancel </span>
+                                                <span><i className="fas fa-trash-alt"></i></span>
+                                            </button>
+                                            <button type = "button"
+                                                className = "btn btn-outline-success"
+                                                style={{width: '8rem'}}
+                                                id = {prescription.prescriptionID}
+                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
+                                                <span className="btn-inner--text">Edit </span>
+                                                <span><i className="fas fa-edit"></i></span>
+                                            </button>
+                                            </div>
+                                            :
+                                            user === 'Dispenser' && prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                            <div>
+                                            <button type = "button"
+                                                className = "btn btn-outline-danger"
+                                                style={{width: '8rem'}}
+                                                id = {prescription.prescriptionID}
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
                                                 <span><i className="fas fa-trash-alt"></i></span>
@@ -275,18 +289,6 @@ class Prescription extends Component {
                                             <button type = "button"
                                                 className = "btn btn-outline-info"
                                                 style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {this.onRedeemClick}>
-                                                <span className="btn-inner--text">Redeem </span>
-                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
-                                            </button>
-                                            </div>
-                                            :
-                                            prescription ?
-                                            <div>
-                                            <button type = "button"
-                                                className = "btn btn-outline-info"
-                                                style={{width: '8rem'}}
                                                 id={prescription.prescriptionID}
                                                 onClick = {this.onRedeemClick}>
                                                 <span className="btn-inner--text">Redeem </span>
@@ -294,8 +296,7 @@ class Prescription extends Component {
                                             </button>
                                             </div>
                                             :
-                                            ""
-                                        }
+                                            "" }
                                         </div>
                                     </div>
                                 </div>
