@@ -39,7 +39,7 @@ Running front and backend tests without `npm install`:
 sudo ./testRunner.sh -nfb
 ```
 
-Important: ensure that the `connections.js` file has the desired values. When `Blockchain = true`, the backend tests fail due to timeout. This is because adding prescriptions to the blockchain takes a long time, not necessarily that there is an issue. Furthermore, ensure that the `settings.js` has `env: 'test'` so that the routes are unauthenticated for testing. 
+Important: ensure that the `connections.js` file has the desired values. When `Blockchain = true`, the backend tests fail due to timeout. This is because adding prescriptions to the blockchain takes a long time, not necessarily that there is an issue. Furthermore, ensure that the `settings.js` has `env: 'test'` so that the routes are unauthenticated for testing. However, when developing, make sure that it is set to `dev`.  
 
 ### Troubleshooting
 

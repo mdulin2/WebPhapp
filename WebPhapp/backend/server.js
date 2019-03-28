@@ -60,6 +60,47 @@ function convertDatesToString(prescription){
 }
 
 /*
+    Given a list of prescriptions, organize them in decreasing, chronological order.
+    prescriptions: An array of prescription objects
+    attribute: A value to determine the mode of the function.
+        1 for the written date to organize, anything else for fillDates
+    returns an array of organized prescriptions
+*/
+function orderPrescriptions(prescriptions, attribute){
+
+    var length = prescriptions.length;
+    for (var i = length-1; i>=0; i--){
+        for (var j = 1; j<=i; j++){
+            // Organize by written date
+            if(attribute === 1){
+                if(prescriptions[j-1].writtenDate < prescriptions[j].writtenDate){
+                    var temp = prescriptions[j-1];
+                    prescriptions[j-1] = prescriptions[j];
+                    prescriptions[j] = temp;
+                }
+            // Organized by last fill date
+            }else{
+                if(prescriptions[j-1].fillDates.length === 0){
+                    var temp = prescriptions[j-1];
+                    prescriptions[j-1] = prescriptions[j];
+                    prescriptions[j] = temp;
+                }
+                else if(prescriptions[j].fillDates.length === 0){
+                    continue;
+                }
+                else if(prescriptions[j-1].fillDates[prescriptions[j-1].fillDates.length-1] < prescriptions[j].fillDates[prescriptions[j].fillDates.length-1]){
+                    var temp = prescriptions[j-1];
+                    prescriptions[j-1] = prescriptions[j];
+                    prescriptions[j] = temp;
+                }
+            }
+
+        }
+    }
+    return prescriptions;
+}
+
+/*
 An api endpoint that cancels a prescription associated with a given prescriptionID.
 Example:
     Directly in terminal:
@@ -338,6 +379,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
@@ -782,6 +824,16 @@ app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, R
     res.status(200).send(token);
 });
 
+/*
+About:
+    Users need to be able to logout. So, this request just clears the auth_token cookie for the user.
+Returns:
+    Nothing
+*/
+app.get('/api/v1/users/logout', (req,res) => {
+    res.cookie('auth_token','');
+    res.status(200);
+});
 
 // ------------------------
 //       dispensers
@@ -870,6 +922,8 @@ app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', auth.checkAuth([Rol
             res.status(200).send(prescriptions);
             return;
         }
+
+        prescriptions = orderPrescriptions(prescriptions,1);
 
         // Convert date integers to strings
         prescriptions = prescriptions.map(
@@ -987,6 +1041,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAu
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
@@ -1104,6 +1159,7 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Ro
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,0);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
