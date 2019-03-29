@@ -67,7 +67,23 @@ function convertDatesToString(prescription){
     returns an array of organized prescriptions
 */
 function orderPrescriptions(prescriptions, attribute){
+    return prescriptions.sort((pres1, pres2) => {
+        if(attribute === 1){
+            return  pres2.writtenDate - pres1.writtenDate;
+        }
 
+        if(pres1.fillDates.length === 0 ){
+            return 1;
+        }
+        else if(pres2.fillDates.length === 0){
+            return -1;
+        }
+        else{
+            return pres2.fillDates[pres2.fillDates.length-1] - pres1.fillDates[pres1.fillDates.length-1];
+        }
+    });
+}
+/*
     var length = prescriptions.length;
     for (var i = length-1; i>=0; i--){
         for (var j = 1; j<=i; j++){
@@ -99,7 +115,7 @@ function orderPrescriptions(prescriptions, attribute){
     }
     return prescriptions;
 }
-
+*/
 /*
 An api endpoint that cancels a prescription associated with a given prescriptionID.
 Example:
