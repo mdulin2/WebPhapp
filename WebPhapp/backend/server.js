@@ -83,39 +83,7 @@ function orderPrescriptions(prescriptions, attribute){
         }
     });
 }
-/*
-    var length = prescriptions.length;
-    for (var i = length-1; i>=0; i--){
-        for (var j = 1; j<=i; j++){
-            // Organize by written date
-            if(attribute === 1){
-                if(prescriptions[j-1].writtenDate < prescriptions[j].writtenDate){
-                    var temp = prescriptions[j-1];
-                    prescriptions[j-1] = prescriptions[j];
-                    prescriptions[j] = temp;
-                }
-            // Organized by last fill date
-            }else{
-                if(prescriptions[j-1].fillDates.length === 0){
-                    var temp = prescriptions[j-1];
-                    prescriptions[j-1] = prescriptions[j];
-                    prescriptions[j] = temp;
-                }
-                else if(prescriptions[j].fillDates.length === 0){
-                    continue;
-                }
-                else if(prescriptions[j-1].fillDates[prescriptions[j-1].fillDates.length-1] < prescriptions[j].fillDates[prescriptions[j].fillDates.length-1]){
-                    var temp = prescriptions[j-1];
-                    prescriptions[j-1] = prescriptions[j];
-                    prescriptions[j] = temp;
-                }
-            }
 
-        }
-    }
-    return prescriptions;
-}
-*/
 /*
 An api endpoint that cancels a prescription associated with a given prescriptionID.
 Example:
