@@ -60,6 +60,61 @@ function convertDatesToString(prescription){
 }
 
 /*
+Given a prescription in JSON form, validate that the prescription is legitimate. Checktype is to change the validation depending on the usage. i.e: 'add', 'edit'
+Returns:
+    true or false
+*/
+async function validPrescription(prescription, checkType){
+
+    // validate that the patient exists
+    var all_patients = readJsonFileSync(
+        __dirname + '/' + "dummy_data/patients.json").patients;
+    var matchingPatients = all_patients.filter(function(elem) {
+            return (elem.patientID === prescription.patientID);
+    });
+    if(matchingPatients.length === 0 && checkType === 'add'){
+        return "patient does not exist.";
+    }
+
+    // validate that the patient exists
+    var all_dispensers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+    var matchingDispensers = all_dispensers.filter(function(elem) {
+            return (elem.dispenserID === prescription.dispenserID);
+    });
+
+    if(matchingDispensers.length === 0){
+        return "dispenser does not exist.";
+    }
+
+    // TODO: Check for specific quantity strings such as mg
+    // TODO: Check quantity depending on the drug
+    if(prescription.quantity === ''){
+        return "quantity is blank."
+    }
+    // Validate the drug
+    if(conn.MySQL && checkType === 'add'){
+         const drugs = await mysql.getDrugNamesFromIDs([prescription.drugID], connection);
+         if(drugs.rows.length === 0){
+             return "drug does not exist.";
+         }
+    }
+
+    // TODO prescriberID should be vaild
+    // Validating refills
+    if(isNaN(prescription.refillsLeft) || parseInt(prescription.refillsLeft) <= 0 || parseInt(prescription.refillsLeft) >= 15){
+        return "refill count incorrect (0-15 is valid).";
+    }
+    // Validate daysFor
+    if(isNaN(prescription.daysFor) || parseInt(prescription.daysFor) < 0){
+        return "days the drug is allowed for should be a positive number.";
+    }
+
+    return true;
+}
+
+
+/*
     Given a list of prescriptions, organize them in decreasing, chronological order.
     prescriptions: An array of prescription objects
     attribute: A value to determine the mode of the function.
@@ -146,7 +201,7 @@ Returns:
     true (and status code 200) if prescription edited, false (and status code 400) otherwise.
 */
 
-app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
+app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), async (req,res) => {
 
     const changedPrescription = req.body;
 
@@ -169,12 +224,16 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
     fields = new Set([
         changedPrescription.prescriptionID,
         changedPrescription.quantity,
-        changedPrescription.daysValid,
+        changedPrescription.daysFor,
         changedPrescription.refillsLeft,
         changedPrescription.dispenserID
     ]);
     if(fields.has(undefined) || fields.has(null)) {
         return finish('/api/v1/prescriptions/edit: One of the mandatory prescription fields is null or undefined.', false);
+    }
+    const is_prescription_valid = await validPrescription(changedPrescription, "edit");
+    if(is_prescription_valid !== true){
+        return finish('Prescription input bad because ' + is_prescription_valid, false)
     }
 
     if(conn.Blockchain){
@@ -236,7 +295,7 @@ Returns:
 Note on daysValid field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
-app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
+app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -287,6 +346,11 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
     // validate there are no extraneous fields
     if(Object.keys(prescription).length > fields.length){
         return finish('Prescription input has too many fields.', false);
+    }
+
+    const is_prescription_valid = await validPrescription(prescription, "add");
+    if(is_prescription_valid !== true){
+        return finish('Prescription input bad because ' + is_prescription_valid, false)
     }
 
     // other validation here should include:
